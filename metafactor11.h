@@ -1,15 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2014 by Vladimir Mirnyy                                 *
+ *   Copyright (C) 2015 by Vladimir Mirnyy, blog.scpp.eu                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
+ *   it under the terms of the MIT License                                 *
  ***************************************************************************/
 
 #ifndef __metafactor11_h
@@ -18,6 +11,8 @@
 /** \file
     \brief factorization meta-algorithms 
 */
+
+#include <cmath>
 
 #include "metafactorcommon.h"
 
@@ -80,24 +75,6 @@ struct typelist_out<typelist<>>
   }
 };
 
-
-template<typename TList>
-struct OutTypeList;
-
-template<typename H, typename ...Tail>
-struct OutTypeList<typelist<H,Tail...> > {
-  static void print(std::ostream& os, const char sep = '\t') {
-    os << H::first::value << "^" << H::second::value << sep;
-    typedef OutTypeList<typelist<Tail...>> Next;
-    Next::print(os, sep);
-  }
-};
-template<>
-struct OutTypeList<typelist<>> {
-  static void print(std::ostream& os, const char sep = '\t') {
-    os << std::endl;
-  }
-};
 
 
 template<typename TList>
@@ -324,5 +301,47 @@ struct factorization<sint<1>, Q, typelist<> > {
   typedef typelist<> type;
 };
 
+
+template<typename List>
+struct CheckPrimesList;
+
+template<typename H, typename ...Tail>
+struct CheckPrimesList<typelist<H,Tail...> >
+{
+  static bool apply() 
+  {
+    if (H::value > 2 && H::value % 2 == 0) {
+      std::cout << ">>> " << H::value << std::endl;
+      return false;
+    }
+    if (H::value > 3 && H::value % 3 == 0) {
+      std::cout << ">>> " << H::value << std::endl;
+      return false;
+    }
+    if (H::value > 5 && H::value % 5 == 0) {
+      std::cout << ">>> " << H::value << std::endl;
+      return false;
+    }
+    int k = 1;
+    while (6*k+1 <= (int)floor(sqrt((double)H::value))) {
+      if (H::value % (6*k+1) == 0) {
+	std::cout << ">>> " << H::value << std::endl;
+	return false;
+      }
+      if (H::value % (6*k+5) == 0) {
+	std::cout << ">>> " << H::value << std::endl;
+	return false;
+      }
+      k++;
+    }
+    return CheckPrimesList<typelist<Tail...>>::apply();
+  }
+};
+
+template<>
+struct CheckPrimesList<typelist<>>
+{
+  static bool apply() { return true; }
+};
 
 #endif /*__metafactor11_h*/
