@@ -132,6 +132,51 @@ struct SelectFactors<N,Q,K,Loki::NullType>
 };
 
 
+template<int_t N, unsigned int Q, int_t K, typename RList, bool doExit = false>
+struct FactorLoop;
+
+template<int_t N, unsigned int Q, int_t K, typename H, typename Tail>
+struct FactorLoop<N,Q,K,Loki::Typelist<H,Tail>,false>
+{
+  static const int_t candidate = Q*K + H::value;
+  typedef try_factor<N, candidate> trial;
+  typedef spair<sint<candidate>, sint<trial::power> > T;
+  typedef typename FactorLoop<N/trial::factor, Q, K, Tail, (candidate*candidate > N)>::type nextIter;
+  typedef typename Loki::Select<(trial::power > 0), Loki::Typelist<T,nextIter>, nextIter>::Result Result;
+};
+
+template<int_t N, unsigned int Q, int_t K, typename H, typename Tail>
+struct FactorLoop<N,Q,K,Loki::Typelist<H,Tail>,true>
+: public FactorLoop<N,Q,K,Loki::NullType,true> {};
+
+template<int_t N, unsigned int Q, int_t K>
+struct FactorLoop<N,Q,K,Loki::NullType,false>
+{
+  static const int_t Candidate = Q*(K+1) + 1;
+  typedef typename SelectFactors<N,Q,K+1,Reminders>::type RList;
+  typedef typename FactorLoop<N,Q,K+1,RList,(Candidate*Candidate > N)>::Result Result;
+};
+
+template<int_t N, unsigned int Q, int_t K>
+struct FactorLoop<N,Q,K,Loki::NullType,true>
+{
+  typedef spair<sint<N>, sint<1> > T;
+  typedef Loki::Typelist<T,Loki::NullType> Result;
+};
+
+template<unsigned int Q, int_t K, typename RList>
+struct FactorLoop<1,Q,K,RList,true>
+{
+  typedef Loki::NullType Result;
+};
+
+template<unsigned int Q, int_t K>
+struct FactorLoop<1,Q,K,Loki::NullType,true>
+{
+  typedef Loki::NullType Result;
+};
+
+
 template<typename Num,
 typename StartList = InitialPrimesList>
 struct Factorization;
@@ -140,7 +185,6 @@ struct Factorization;
 template<int_t N, typename H, typename Tail>
 struct Factorization<sint<N>, Loki::Typelist<H,Tail> >
 {
-  //static const int_t N = Num::value;
   typedef try_factor<N, H::value> trial;
   static const int_t P = trial::power;
   typedef sint<N/trial::factor> NextNum;
@@ -152,12 +196,11 @@ struct Factorization<sint<N>, Loki::Typelist<H,Tail> >
 // Further factorization 
 template<int_t N>
 struct Factorization<sint<N>, Loki::NullType> 
-//: public KLoop<N, 1> {};
 {
   static const short Q = StartQ;
   static const int_t Candidate = Q + 1;
   typedef typename SelectFactors<N,Q,1,Reminders>::Result RList;
-  typedef typename RLoop<N,Q,1,RList,(Candidate*Candidate > N)>::Result Result;
+  typedef typename FactorLoop<N,Q,1,RList,(Candidate*Candidate > N)>::Result Result;
 };
 
 // End of factorization

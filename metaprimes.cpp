@@ -40,21 +40,32 @@ static const int_t StartQ = 2*3*5*7*11;
 static const int_t LastQPrime = 11;
 #endif
 
-#if !defined(CPP) || CPP != 11
+// #if !defined(CPP) || CPP != 11
 #include "metafactor.h"
-typedef ListOfPrimes<LastQPrime,N>::Result PrimesList;
-#else  // c++11
-#include "metafactor11.h"
-typedef ListOfPrimes<LastQPrime,N>::type PrimesList;
-#endif
+//typedef ListOfPrimes<LastQPrime,N>::Result PrimesList;
+// #else  // c++11
+// #include "metafactor11.h"
+// typedef ListOfPrimes<LastQPrime,N>::type PrimesList;
+// #endif
 
+#include "metaprimes.h"
 
 //typedef ListOfPrimes<7,2*3*5*7>::Result PList;
 
 int main(int argc, char *argv[])
 {
-  typelist_out<PrimesList>::print();
-//  std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
+//  typedef Loki::Typelist<sint<5>,Loki::NullType> RList5;
+//   typedef TYPELIST_7(sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) RList;
+//   typedef FilterRList<210,typename RList::Tail,11> Filter;
+//   typedef Loki::Typelist<typename RList::Head, typename Filter::CheckPrimes> PrimesToCheck;
+//  typedef GenPrimesFormula<210,30,1,RList,PrimesToCheck>::Result PrimesList;
+//   typedef GenPrimesFormula<210,30,1,RList>::Result PrimesList30;
+//   typedef Loki::TL::Append<PrimesList5,Loki::Typelist<sint<31>,PrimesList30> >::Result PList;
+//    typedef FilterRList<210,RList>::ExcludedPrimes PrimesList;
+    
+  typedef GenPrimes<1000>::Result PrimesList;
+  typelist_out<PrimesList>::print(std::cout, '\n');
+  std::cout << Loki::TL::Length<PrimesList>::value + 3 << std::endl;
 
   // Run-time check of the list
   if (CheckPrimesList<PrimesList>::apply())

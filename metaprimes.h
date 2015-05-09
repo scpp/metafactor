@@ -75,19 +75,183 @@ struct NextPrimesDirect<Start, Limit, K, false>
 };
 
 
-template<int Start, typename List, bool C = (Start < List::Head::value)> 
-struct BuildList;
 
-template<int Start, typename List> 
-struct BuildList<Start, List, false>
+template<int_t Candidate, typename InitRList, bool doExit = false>
+struct CheckPrime;
+
+template<int_t Candidate, typename H, typename Tail>
+struct CheckPrime<Candidate,Loki::Typelist<H,Tail>,false>
 {
-  typedef typename BuildList<Start, typename List::Tail>::Result Result;
+  static const bool value = (Candidate % H::value != 0) && 
+         CheckPrime<Candidate,Tail,(H::value*H::value >= Candidate)>::value;
 };
 
-template<int Start, typename List> 
-struct BuildList<Start, List, true>
+template<int_t Candidate>
+struct CheckPrime<Candidate,Loki::NullType,false>
 {
-  typedef Loki::Typelist<sint<1>, List> Result;
+  static const bool value = true;
+};
+
+template<int_t Candidate, typename H, typename Tail>
+struct CheckPrime<Candidate,Loki::Typelist<H,Tail>,true>
+{
+  static const bool value = true;
+};
+
+template<int_t Candidate>
+struct CheckPrime<Candidate,Loki::NullType,true>
+{
+  static const bool value = true;
+};
+
+
+template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors,
+         typename RList = InitRList, bool doExit = false>
+struct GenPrimesFormula;
+
+template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors, 
+typename H, typename Tail>
+struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::Typelist<H,Tail>,false>
+{
+  static const int_t candidate = Q*K + H::value;
+  typedef typename GenPrimesFormula<Limit, Q, K, InitRList, CheckFactors, Tail, (candidate > Limit)>::Result nextIter;
+  typedef typename Loki::Select<(candidate <= Limit && CheckPrime<candidate, CheckFactors>::value), 
+          Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+//   typedef typename Loki::Select<(candidate <= Limit && (candidate%5 != 0) && IsPrime<candidate>::value), 
+//           Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+};
+
+template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors>
+struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,false>
+{
+  static const int_t candidate = Q*(K+1) + 1;
+  typedef typename GenPrimesFormula<Limit, Q, K+1, InitRList, CheckFactors, InitRList, (K+1 == InitRList::Head::value)>::Result nextIter;
+  typedef typename Loki::Select<(candidate <= Limit && (K+1 < InitRList::Head::value) && CheckPrime<candidate, CheckFactors>::value), 
+          Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+//   typedef typename Loki::Select<(candidate <= Limit && (K+1 < InitRList::Head::value) && (candidate%5 != 0) && IsPrime<candidate>::value), 
+//           Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+};
+
+template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors, typename H, typename Tail>
+struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::Typelist<H,Tail>,true>
+{
+  typedef Loki::NullType Result;
+};
+
+template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors>
+struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,true>
+{
+  typedef Loki::NullType Result;
+};
+
+
+
+
+template<typename List, typename N>
+struct InsertOrdered;
+
+template<typename H, typename Tail, typename N>
+struct InsertOrdered<Loki::Typelist<H, Tail>, N>
+{
+  typedef typename Loki::Select<(N::value <= H::value), Loki::Typelist<N,Loki::Typelist<H, Tail> >,
+          Loki::Typelist<H,typename InsertOrdered<Tail, N>::Result> >::Result Result;
+};
+
+template<typename N>
+struct InsertOrdered<Loki::NullType, N>
+{
+  typedef Loki::NullType Result;
+};
+
+
+template<int_t Q, typename List, int_t N>
+struct FilterRList;
+
+template<int_t Q, typename H, typename Tail, int_t N>
+struct FilterRList<Q, Loki::Typelist<H, Tail>, N>
+{
+  static const bool C = (N*H::value < Q);
+  typedef FilterRList<Q,Tail,N> Next;
+  typedef typename Loki::Select<C, Loki::Typelist<H,typename Next::ExcludedPrimes>, Loki::NullType>::Result ExcludedPrimes;
+  typedef typename Loki::Select<C, typename Next::CheckPrimes, Loki::Typelist<H, Tail> >::Result CheckPrimes;
+};
+
+template<int_t Q, int_t N>
+struct FilterRList<Q, Loki::NullType, N>
+{
+  typedef Loki::NullType ExcludedPrimes;
+  typedef Loki::NullType CheckPrimes;
+};
+
+
+template<typename List, int_t N>
+struct EliminateNonPrimesLoop;
+
+template<typename H, typename Tail, int_t N>
+struct EliminateNonPrimesLoop<Loki::Typelist<H, Tail>, N>
+{
+  typedef typename EliminateNonPrimesLoop<Tail,N>::Result Next;
+  typedef typename Loki::Select<(H::value%N != 0), Loki::Typelist<H,Next>, Next>::Result Result;
+};
+
+template<int_t N>
+struct EliminateNonPrimesLoop<Loki::NullType,N>
+{
+  typedef Loki::NullType Result;
+};
+
+
+template<typename List, typename PossibleFactors>
+struct EliminateNonPrimes;
+
+template<typename List, typename H, typename Tail>
+struct EliminateNonPrimes<List, Loki::Typelist<H, Tail> >
+{
+  typedef typename EliminateNonPrimesLoop<List,H::value>::Result NewList;
+  typedef typename EliminateNonPrimes<NewList,Tail>::Result Result;
+};
+
+template<typename List>
+struct EliminateNonPrimes<List, Loki::NullType>
+{
+  typedef List Result;
+};
+
+
+template<typename T>
+struct GetFirstPrime
+{
+  static const int_t value = T::Head::value;
+};
+
+template<>
+struct GetFirstPrime<Loki::NullType>
+{
+  static const int_t value = 1;
+};
+
+template<int_t Limit, int_t StartQ=6, 
+typename StartRList = TYPELIST_1(sint<5>), bool doExit = false>
+struct GenPrimes;
+
+template<int_t Limit, int_t Q, typename RList>
+struct GenPrimes<Limit,Q,RList,false>
+{
+  static const int_t NextQ = Q*RList::Head::value;
+  typedef FilterRList<NextQ,typename RList::Tail,GetFirstPrime<typename RList::Tail>::value> Filter;
+  typedef Loki::Typelist<typename RList::Head, typename Filter::CheckPrimes> PrimesToCheck;
+  typedef Loki::Typelist<sint<Q+1>,   // Q+1 is always prime and should not be checked
+    typename GenPrimesFormula<Limit,Q,1,RList,PrimesToCheck>::Result> NewList;
+  typedef typename EliminateNonPrimes<NewList,typename Filter::ExcludedPrimes>::Result PrimesList;
+  typedef typename Loki::TL::Append<typename RList::Tail, NewList>::Result NextRList;
+  typedef typename GenPrimes<Limit, NextQ, NextRList, (NextQ+1 > Limit)>::Result NextIter;
+  typedef typename Loki::TL::Append<PrimesList,NextIter>::Result Result;
+};
+
+template<int_t Limit, int_t Q, typename RList>
+struct GenPrimes<Limit,Q,RList,true>
+{
+  typedef Loki::NullType Result;
 };
 
 
@@ -137,6 +301,22 @@ struct ListOfPrimes
 // 		    sint<107>, sint<109>, sint<113>, sint<127>, sint<131>, sint<137>, sint<139>, sint<149>, 
 // 		    sint<151>, sint<157>, sint<163>, sint<167>, sint<173>, sint<179>, sint<181>, sint<191>, 
 // 		    sint<193>, sint<197>, sint<199>) InitialPrimesList;
+
+template<int Start, typename List, bool C = (Start < List::Head::value)> 
+struct BuildList;
+
+template<int Start, typename List> 
+struct BuildList<Start, List, false>
+{
+  typedef typename BuildList<Start, typename List::Tail>::Result Result;
+};
+
+template<int Start, typename List> 
+struct BuildList<Start, List, true>
+{
+  typedef Loki::Typelist<sint<1>, List> Result;
+};
+
 
 typedef ListOfPrimes<LastQPrime,StartQ>::Result InitialPrimesList;
 //typedef Loki::TL::Reverse<BuildList<LastQPrime,InitialPrimesList>::Result>::Result Reminders;
