@@ -81,36 +81,41 @@ struct Print<Loki::Typelist<Head,Tail> > {
 };
 
 
-// typedef TYPELIST_2(sint<1>, sint<5>) RList6;
+template<int I = MODE-1>
+struct InitList 
+{
+  typedef InitList<I-1> Prev;
+  typedef GenPrimes<StartQ,StartQ/LastQPrime,typename Prev::Reminders> Formula;
+  
+  typedef typename Formula::NextRList Reminders;
+  typedef typename Loki::TL::Append<typename Prev::PrimesList, typename Formula::Result>::Result PrimesList;
+};
+
+template<>
+struct InitList<0>
+{
+  typedef TYPELIST_1(sint<5>) Reminders;
+  typedef TYPELIST_3(sint<2>, sint<3>, sint<5>) PrimesList;
+};
+
+
+typedef InitList<MODE>::PrimesList InitialPrimesList;
+typedef InitList<MODE>::Reminders  Reminders;
+ 
+// typedef TYPELIST_1(sint<5>) Reminders1;
+// typedef TYPELIST_3(sint<2>, sint<3>, sint<5>) InitialPrimesList1;
 // 
-// typedef TYPELIST_8(sint<1>, sint<7>, sint<11>, sint<13>, sint<17>, sint<19>, sint<23>, sint<29>) RList30;
-// typedef Loki::TL::Reverse<RList30>::Result Reminders30;
+// typedef TYPELIST_7(sint<7>, sint<11>, sint<13>, sint<17>, sint<19>, sint<23>, sint<29>) Reminders2;
+// typedef typename Loki::TL::Append<InitialPrimesList1, Reminders2>::Result InitialPrimesList2;
 // 
-// typedef TYPELIST_43(sint<1>, sint<11>, sint<13>, sint<17>, sint<19>, sint<23>, 
-// 		    sint<29>, sint<31>, sint<37>, sint<41>, sint<43>, sint<47>, sint<53>, sint<59>, sint<61>, 
-// 		    sint<67>, sint<71>, sint<73>, sint<79>, sint<83>, sint<89>, sint<97>, sint<101>, sint<103>, 
-// 		    sint<107>, sint<109>, sint<113>, sint<127>, sint<131>, sint<137>, sint<139>, sint<149>, 
-// 		    sint<151>, sint<157>, sint<163>, sint<167>, sint<173>, sint<179>, sint<181>, sint<191>, 
-// 		    sint<193>, sint<197>, sint<199>) RList210;
-// typedef Loki::TL::Reverse<RList210>::Result Reminders210;
+// typedef GenPrimes<210,30,Reminders2> Formula30k;
+// typedef Formula30k::NextRList Reminders3;
+// typedef typename Loki::TL::Append<InitialPrimesList2, Formula30k::Result>::Result InitialPrimesList3;
 // 
-// typedef Reminders210 Reminders;
+// typedef GenPrimes<210*11,210,Reminders3> Formula210k;
+// typedef Formula210k::NextRList Reminders4;
+// typedef typename Loki::TL::Append<InitialPrimesList3, Formula210k::Result>::Result InitialPrimesList4;
 
-//typedef TYPELIST_5(sint<2>, sint<3>, sint<5>, sint<7>, sint<11>) InitialPrimesList;
-
-// typedef TYPELIST_10(sint<2>, sint<3>, sint<5>, sint<7>, sint<11>, 
-// 		    sint<13>, sint<17>, sint<19>, sint<23>, sint<29>) InitialPrimesList;
-
-// typedef TYPELIST_46(sint<2>, sint<3>, sint<5>, sint<7>, sint<11>, sint<13>, sint<17>, sint<19>, sint<23>, 
-// 		    sint<29>, sint<31>, sint<37>, sint<41>, sint<43>, sint<47>, sint<53>, sint<59>, sint<61>, 
-// 		    sint<67>, sint<71>, sint<73>, sint<79>, sint<83>, sint<89>, sint<97>, sint<101>, sint<103>, 
-// 		    sint<107>, sint<109>, sint<113>, sint<127>, sint<131>, sint<137>, sint<139>, sint<149>, 
-// 		    sint<151>, sint<157>, sint<163>, sint<167>, sint<173>, sint<179>, sint<181>, sint<191>, 
-// 		    sint<193>, sint<197>, sint<199>) InitialPrimesList;
-
-typedef ListOfPrimes<LastQPrime,StartQ>::Result InitialPrimesList;
-//typedef Loki::TL::Reverse<BuildList<LastQPrime,InitialPrimesList>::Result>::Result Reminders;
-typedef BuildList<LastQPrime,InitialPrimesList>::Result Reminders;
 
 
 

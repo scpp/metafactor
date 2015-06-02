@@ -56,12 +56,17 @@ static const int_t StartQ = 2*3*5*7*11;
 static const int_t LastQPrime = 11;
 #endif
 
+
 #if !defined(CPP) || CPP != 11
+
 #include "metafactor.h"
 typedef Factorization<sint<N> >::Result FList;
+
 #else  // c++11
+
 #include "metafactor11.h"
 typedef factorization<sint<N> >::type FList;
+
 #endif
 
 
@@ -74,9 +79,13 @@ int main(int argc, char *argv[])
   
     typelist_out<FList>::print();
     std::cout << N << std::endl << Check<FList>::get() << std::endl;
-  
-    //typelist_out<Reminders>::print();
-    
+
+//     typedef TYPELIST_7(sint<7>, sint<11>, sint<13>, sint<17>, sint<19>, sint<23>, sint<29>) RList;
+//     typedef GenPrimes<210,30,RList> GP;
+//     typedef GenPrimes<210*11,210,GP::NextRList> GP2;
+//     //typelist_out<GP2::Result>::print();
+//     typelist_out<GP2::NextRList>::print();
+    //std::cout << Loki::TL::Length<Reminders>::value << std::endl;
 	//std::cin.get();
     return 0;
 }

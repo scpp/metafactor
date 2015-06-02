@@ -3,6 +3,8 @@ project(metafactor)
 
 set(CMAKE_CXX_COMPILER g++)
 
+set(CMAKE_BUILD_TYPE Release)
+
 add_executable(metafactor metafactor.cpp)
 add_executable(metaprimes metaprimes.cpp)
 
@@ -29,7 +31,7 @@ add_definitions(/D CPP=${CPP} /D NUM=${NUM} /D MODE=${MODE})
 else(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
 ### GCC, Clang and Intel compilers
-add_definitions(-time -O3 -std=c++11 -ftemplate-depth-300000 -DCPP=${CPP} -DNUM=${NUM} -DMODE=${MODE})
+add_definitions(-time -O3 -std=c++11 -ftemplate-depth-1000000 -DCPP=${CPP} -DNUM=${NUM} -DMODE=${MODE})
 
 endif(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 

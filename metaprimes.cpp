@@ -62,10 +62,14 @@ int main(int argc, char *argv[])
 //   typedef GenPrimesFormula<210,30,1,RList>::Result PrimesList30;
 //   typedef Loki::TL::Append<PrimesList5,Loki::Typelist<sint<31>,PrimesList30> >::Result PList;
 //    typedef FilterRList<210,RList>::ExcludedPrimes PrimesList;
-    
-  typedef GenPrimes<1000>::Result PrimesList;
+
+  //typedef TYPELIST_8(sint<1>,sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) RList;
+  typedef GeneratePrimesF2direct<1000>::Result PrimesList;
+//  typedef GenPrimes<5000>::Result PrimesList;
+
+//  typedef GenPrimes<1000>::Result PrimesList;
   typelist_out<PrimesList>::print(std::cout, '\n');
-  std::cout << Loki::TL::Length<PrimesList>::value + 3 << std::endl;
+  std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
 
   // Run-time check of the list
   if (CheckPrimesList<PrimesList>::apply())
