@@ -15,174 +15,13 @@
 #include <cmath>
 
 #include "metafactorcommon.h"
+#include "metaprimescommon.h"
 
 #include "Typelist.h"
 
-template<int_t PrimeCandidate>
-struct CheckNone
-{
-  static const bool value = true;
-};
 
-template<int_t PrimeCandidate>
-struct CheckSmallPrimes5
-{
-  static const bool value = (PrimeCandidate%5 != 0);
-};
-
-template<int_t PrimeCandidate>
-struct CheckSmallPrimes2_5
-{
-  static const bool value = (PrimeCandidate%2 != 0) && (PrimeCandidate%3 != 0) && (PrimeCandidate%5 != 0);
-};
-
-template<int_t PrimeCandidate>
-struct CheckSmallPrimes13_29
-{
-  static const bool value = (PrimeCandidate%13 != 0) && (PrimeCandidate%17 != 0)
-                         && (PrimeCandidate%19 != 0) && (PrimeCandidate%23 != 0) && (PrimeCandidate%29 != 0);
-};
-
-template<int_t PrimeCandidate>
-struct CheckSmallPrimes11_29
-{
-  static const bool value = (PrimeCandidate%11 != 0) && (PrimeCandidate%13 != 0) && (PrimeCandidate%17 != 0)
-                         && (PrimeCandidate%19 != 0) && (PrimeCandidate%23 != 0) && (PrimeCandidate%29 != 0);
-};
-
-template<int_t PrimeCandidate>
-struct CheckSmallPrimes7_29
-{
-  static const bool value = (PrimeCandidate%7 != 0) && CheckSmallPrimes11_29<PrimeCandidate>::value;
-};
-
-template<int_t PrimeCandidate>
-struct CheckSmallPrimes2_29
-{
-  static const bool value = CheckSmallPrimes2_5<PrimeCandidate>::value && CheckSmallPrimes7_29<PrimeCandidate>::value;
-};
-
-template<int_t PrimeCandidate, int K = 1,
-bool C1 = ((6*K+1)*(6*K+1) <= PrimeCandidate),
-bool C2 = ((PrimeCandidate % (6*K+1) != 0) && (PrimeCandidate % (6*K+5) != 0))> 
-struct IsPrime6loop;
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime6loop<PrimeCandidate, K, true, true>
-{
-  static const bool value = IsPrime6loop<PrimeCandidate, K+1>::value;
-};
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime6loop<PrimeCandidate, K, true, false>
-{
-  static const bool value = false;
-};
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime6loop<PrimeCandidate, K, false, true>
-{
-  static const bool value = true;
-};
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime6loop<PrimeCandidate, K, false, false>
-{
-  static const bool value = false;
-};
-
-template<int_t PrimeCandidate> 
-struct IsPrime6loop<PrimeCandidate, 1, false, false>
-{
-  static const bool value = true;
-};
-
-
-///// -> The implementation below is significantly slower than one above
-// template<int_t PrimeCandidate, int K = 1, 
-// bool doExit = ((6*K+1)*(6*K+1) > PrimeCandidate)>
-// struct IsPrime6loop;
-// 
-// template<int_t PrimeCandidate, int K>
-// struct IsPrime6loop<PrimeCandidate,K,false>
-// {
-//   static const bool C1 = (PrimeCandidate % (6*K+1) != 0);
-//   static const bool C2 = (PrimeCandidate % (6*K+5) != 0);
-//   static const bool value = C1 && C2 && IsPrime6loop<PrimeCandidate,K+1>::value;
-// };
-// 
-// template<int_t PrimeCandidate, int K>
-// struct IsPrime6loop<PrimeCandidate,K,true>
-// {
-//   static const bool value = true;
-// };
-
-template<template<int_t> class InitCheck = CheckSmallPrimes2_5>
-struct IsPrime6
-{
-  template<int_t PrimeCandidate>
-  struct Do {
-    static const bool value = (InitCheck<PrimeCandidate>::value && IsPrime6loop<PrimeCandidate>::value);
-  };
-};
-
-
-
-template<int_t PrimeCandidate, int K = 1,
-bool C1 = ((30*K+1)*(30*K+1) <= PrimeCandidate),
-bool C2 = (PrimeCandidate % (30*K+1) != 0) && (PrimeCandidate % (30*K+7) != 0)
-       && (PrimeCandidate % (30*K+11) != 0) && (PrimeCandidate % (30*K+13) != 0)
-       && (PrimeCandidate % (30*K+17) != 0) && (PrimeCandidate % (30*K+19) != 0)
-       && (PrimeCandidate % (30*K+23) != 0) && (PrimeCandidate % (30*K+29) != 0) > 
-struct IsPrime30loop;
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime30loop<PrimeCandidate, K, true, true>
-{
-  static const bool value = IsPrime30loop<PrimeCandidate, K+1>::value;
-};
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime30loop<PrimeCandidate, K, true, false>
-{
-  static const bool value = false;
-};
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime30loop<PrimeCandidate, K, false, true>
-{
-  static const bool value = true;
-};
-
-template<int_t PrimeCandidate, int K> 
-struct IsPrime30loop<PrimeCandidate, K, false, false>
-{
-  static const bool value = false;
-};
-
-// template<int_t PrimeCandidate> 
-// struct IsPrime30loop<PrimeCandidate, 1, false, true>
-// {
-//   static const bool value = (PrimeCandidate%5 != 0);
-// };
-
-template<int_t PrimeCandidate> 
-struct IsPrime30loop<PrimeCandidate, 1, false, false>
-{
-  static const bool value = (PrimeCandidate%7 != 0);
-};
-
-
-template<template<int_t> class InitCheck = CheckSmallPrimes2_29>
-struct IsPrime30
-{
-  template<int_t PrimeCandidate>
-  struct Do {
-    static const bool value = InitCheck<PrimeCandidate>::value && IsPrime30loop<PrimeCandidate>::value;
-  };
-};
-
-
+// Initial simple and efficient primes generator using formula 6k+r, r = 1,5
+// It has shorter compile-times comparing to GenPrimes
 template<int Start, int Limit, int K, 
 int C = (6*K + 1 <= Limit)>
 struct NextPrimesDirect;
@@ -221,6 +60,7 @@ struct AddType<C,true,Next>
   typedef Loki::Typelist<C,Next> Result;
 };
 
+// Experimental code to achieve shorter compile-times comparing to GenPrimes
 template<int Limit, int K = 1, int C = (30*K + 1 <= Limit)>
 struct NextPrimesDirect30;
 
@@ -262,56 +102,59 @@ struct NextPrimesDirect30<Limit, K, false>
   typedef Loki::NullType Result;
 };
 
-
-template<int_t Candidate, typename InitRList, bool doExit = false>
-struct CheckPrime;
+// Returns true, if Candidate is not divisible by any entry of TrialList
+template<int_t Candidate, typename TrialList, bool doExit = false>
+struct isNotDivisibleByListMembers;
 
 template<int_t Candidate, typename H, typename Tail>
-struct CheckPrime<Candidate,Loki::Typelist<H,Tail>,false>
+struct isNotDivisibleByListMembers<Candidate,Loki::Typelist<H,Tail>,false>
 {
   static const bool value = (Candidate % H::value != 0) && 
-         CheckPrime<Candidate,Tail,(H::value*H::value >= Candidate)>::value;
+         isNotDivisibleByListMembers<Candidate,Tail,(H::value*H::value >= Candidate)>::value;
 };
 
 template<int_t Candidate>
-struct CheckPrime<Candidate,Loki::NullType,false>
+struct isNotDivisibleByListMembers<Candidate,Loki::NullType,false>
 {
   static const bool value = true;
 };
 
 template<int_t Candidate, typename H, typename Tail>
-struct CheckPrime<Candidate,Loki::Typelist<H,Tail>,true>
+struct isNotDivisibleByListMembers<Candidate,Loki::Typelist<H,Tail>,true>
 {
   static const bool value = true;
 };
 
 template<int_t Candidate>
-struct CheckPrime<Candidate,Loki::NullType,true>
+struct isNotDivisibleByListMembers<Candidate,Loki::NullType,true>
 {
   static const bool value = true;
 };
 
-
+// Generate all primes less equal Limit with a constant Q in the formula Q*K+R
+// Second exit criteria: (K+1 == InitRList::Head::value)
 template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors,
-         typename RList = InitRList, bool doExit = false>
+         typename RemindersList = InitRList, bool doExit = false>
 struct GenPrimesFormula;
 
+// Next loop step over RList
 template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors, 
 typename H, typename Tail>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::Typelist<H,Tail>,false>
 {
   static const int_t candidate = Q*K + H::value;
   typedef typename GenPrimesFormula<Limit, Q, K, InitRList, CheckFactors, Tail, (candidate > Limit)>::Result nextIter;
-  typedef typename Loki::Select<(candidate <= Limit && CheckPrime<candidate, CheckFactors>::value), 
+  typedef typename Loki::Select<(candidate <= Limit && isNotDivisibleByListMembers<candidate, CheckFactors>::value), 
           Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
 };
 
+// Next loop step over K
 template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,false>
 {
   static const int_t candidate = Q*(K+1) + 1;
   typedef typename GenPrimesFormula<Limit, Q, K+1, InitRList, CheckFactors, InitRList, (K+1 == InitRList::Head::value)>::Result nextIter;
-  typedef typename Loki::Select<(candidate <= Limit && (K+1 < InitRList::Head::value) && CheckPrime<candidate, CheckFactors>::value), 
+  typedef typename Loki::Select<(candidate <= Limit && (K+1 < InitRList::Head::value) && isNotDivisibleByListMembers<candidate, CheckFactors>::value), 
           Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
 };
 
@@ -329,37 +172,20 @@ struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,true>
 
 
 
-template<typename List, typename N>
-struct InsertOrdered;
-
-template<typename H, typename Tail, typename N>
-struct InsertOrdered<Loki::Typelist<H, Tail>, N>
-{
-  typedef typename Loki::Select<(N::value <= H::value), Loki::Typelist<N,Loki::Typelist<H, Tail> >,
-          Loki::Typelist<H,typename InsertOrdered<Tail, N>::Result> >::Result Result;
-};
-
-template<typename N>
-struct InsertOrdered<Loki::NullType, N>
-{
-  typedef Loki::NullType Result;
-};
-
-
 template<int_t Q, typename List, int_t N>
-struct FilterRList;
+struct FilterRemindersList;
 
 template<int_t Q, typename H, typename Tail, int_t N>
-struct FilterRList<Q, Loki::Typelist<H, Tail>, N>
+struct FilterRemindersList<Q, Loki::Typelist<H, Tail>, N>
 {
   static const bool C = (N*H::value < Q);
-  typedef FilterRList<Q,Tail,N> Next;
+  typedef FilterRemindersList<Q,Tail,N> Next;
   typedef typename Loki::Select<C, Loki::Typelist<H,typename Next::ExcludedPrimes>, Loki::NullType>::Result ExcludedPrimes;
   typedef typename Loki::Select<C, typename Next::CheckPrimes, Loki::Typelist<H, Tail> >::Result CheckPrimes;
 };
 
 template<int_t Q, int_t N>
-struct FilterRList<Q, Loki::NullType, N>
+struct FilterRemindersList<Q, Loki::NullType, N>
 {
   typedef Loki::NullType ExcludedPrimes;
   typedef Loki::NullType CheckPrimes;
@@ -401,13 +227,13 @@ struct EliminateNonPrimes<List, Loki::NullType>
 
 
 template<typename T>
-struct GetFirstPrime
+struct GetFirstNumberInList
 {
   static const int_t value = T::Head::value;
 };
 
 template<>
-struct GetFirstPrime<Loki::NullType>
+struct GetFirstNumberInList<Loki::NullType>
 {
   static const int_t value = 1;
 };
@@ -420,7 +246,7 @@ template<int_t Limit, int_t Q, typename RList>
 struct GenPrimes<Limit,Q,RList,false>
 {
   static const int_t NextQ = Q*RList::Head::value;
-  typedef FilterRList<NextQ,typename RList::Tail,GetFirstPrime<typename RList::Tail>::value> Filter;
+  typedef FilterRemindersList<NextQ,typename RList::Tail,GetFirstNumberInList<typename RList::Tail>::value> Filter;
   typedef Loki::Typelist<typename RList::Head, typename Filter::CheckPrimes> PrimesToCheck;
   typedef Loki::Typelist<sint<Q+1>,   // Q+1 is always prime and should not be checked
     typename GenPrimesFormula<(NextQ<Limit) ? NextQ : Limit,Q,1,RList,PrimesToCheck>::Result> NewList;
@@ -438,6 +264,8 @@ struct GenPrimes<Limit,Q,RList,true>
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+// Generate all primes less equal Limit with a constant Q in the formula Q*K+R
+// Similar to GenPrimesFormula, but without second exit condition
 template<int_t Limit, int_t Q, int_t K, typename InitRList, 
          typename CheckPrimeCandidate = IsPrime6<>,
          typename RList = InitRList, bool doExit = false>
@@ -528,49 +356,12 @@ struct GeneratePrimesF3
   typedef typename Loki::TL::Append<List3, PrimesList>::Result Result;
 };
 
-// Obsolete and unused!
-// Two alternatives, but similar implementations
-template<int Start, int Limit> 
-struct ListOfPrimes
-{
-  // Two different approaches to build the list of primes
-  // 1) Using the list builder NextPrimes
-  //    Each next candidate is checked using the existing growing list of primes starting with 'CheckList'
-//   typedef Loki::Typelist<sint<2>, Loki::Typelist<sint<3>, Loki::Typelist<sint<5>, Loki::NullType> > > StartList;
-//   typedef Loki::Typelist<sint<5>, Loki::NullType> CheckList;
-//   typedef typename Loki::TL::Append<StartList, typename NextPrimes<6, CheckList, Limit>::Result>::Result Result;
-
-  // 2) Using the list builder NextPrimesDirect
-  //    Each next candidate is checked using the numbers (6*k+1) and (6*k+5), which contain all the primes
-  //    This approach builds the list in one way without iterating it
-  //    That results in a smaller (2-3 times) compile-time than the first approach
-   typedef typename Loki::Typelist<sint<2>, Loki::Typelist<sint<3>, Loki::Typelist<sint<5>, Loki::Typelist<sint<7>,  
-           typename NextPrimesDirect<Start, Limit, 1>::Result> > > > Result;
-};
-
-
-template<int_t N, short Q, int_t K, typename RList>
-struct CheckAll;
-
-template<int_t N, short Q, int_t K, typename H, typename Tail>
-struct CheckAll<N,Q,K,Loki::Typelist<H,Tail> >
-{
-  static const int_t Candidate = Q*K + H::value;
-  static const bool value = (N % Candidate == 0) || CheckAll<N,Q,K,Tail>::value;
-};
-
-template<int_t N, short Q, int_t K>
-struct CheckAll<N,Q,K,Loki::NullType>
-{
-  static const bool value = false;
-};
-
 
 template<typename List>
-struct CheckPrimesList;
+struct CheckPrimesListAtRunTime;
 
 template<typename H, typename T>
-struct CheckPrimesList<Loki::Typelist<H,T> >
+struct CheckPrimesListAtRunTime<Loki::Typelist<H,T> >
 {
   static bool apply() 
   {
@@ -598,12 +389,12 @@ struct CheckPrimesList<Loki::Typelist<H,T> >
       }
       k++;
     }
-    return CheckPrimesList<T>::apply();
+    return CheckPrimesListAtRunTime<T>::apply();
   }
 };
 
 template<>
-struct CheckPrimesList<Loki::NullType>
+struct CheckPrimesListAtRunTime<Loki::NullType>
 {
   static bool apply() { return true; }
 };

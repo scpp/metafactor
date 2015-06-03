@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
 
   // Run-time check of the list
-  if (CheckPrimesList<PrimesList>::apply())
+  if (CheckPrimesListAtRunTime<PrimesList>::apply())
     std::cout << "Ok!" << std::endl;
   
   //std::cin.get();
