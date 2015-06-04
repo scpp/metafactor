@@ -16,66 +16,9 @@
 
 #include "metafactorcommon.h"
 
-#include <type_traits>
+#include "variadic_typelist.h"
 
-// A class template that just a list of types:
-template <class... T> struct typelist { };
-
-template <typename List1, typename List2> 
-struct typelist_cat;
-
-template <typename ...List1, typename ...List2>
-struct typelist_cat<typelist<List1...>, typelist<List2...>>
-{
-  typedef typelist<List1..., List2...> type;
-};
-
-template <typename T, typename ...List2>
-struct typelist_cat<T, typelist<List2...>>
-{
-  typedef typelist<T, List2...> type;
-};
-
-template <typename T, typename ...List1>
-struct typelist_cat<typelist<List1...>,T>
-{
-  typedef typelist<List1... ,T> type;
-};
-
-
-template<typename List>
-struct typelist_out;
-
-template<typename T, typename ...Args>
-struct typelist_out<typelist<T, Args...> >
-{
-  static void print(std::ostream& os = std::cout, const char sep = '\t') 
-  {
-    os << T::value << sep;
-    typelist_out<typelist<Args...>>::print(os, sep);
-  }
-};
-
-template<typename T1, typename T2, typename ...Args>
-struct typelist_out<typelist<spair<T1,T2>, Args...> >
-{
-  static void print(std::ostream& os = std::cout, const char sep = '\t') 
-  {
-    os << T1::value << "^" << T2::value << sep;
-    typelist_out<typelist<Args...>>::print(os, sep);
-  }
-};
-
-template<>
-struct typelist_out<typelist<>>
-{
-  static void print(std::ostream& os = std::cout, const char sep = '\t') 
-  { 
-    os << std::endl;
-  }
-};
-
-
+#include "metaprimes11.h"
 
 template<typename TList>
 struct Check;
@@ -123,31 +66,6 @@ struct IsPrime<Primecandidate, K, false, false>
   static const bool value = false;
 };
 
-
-
-template<int Start, int Limit, int K, 
-int C = (6*K + 1 <= Limit)>
-struct nextPrimesDirect;
-
-template<int Start, int Limit, int K> 
-struct nextPrimesDirect<Start, Limit, K, true>
-{
-  static const int Primecandidate1 = 6*K + 1;
-  static const int Primecandidate2 = 6*K + 5;
-  static const bool p1 = IsPrime<Primecandidate1>::value && (Primecandidate1 % 5 != 0) && (Primecandidate1 > Start);
-  static const bool p2 = IsPrime<Primecandidate2>::value && (Primecandidate2 % 5 != 0) && (Primecandidate2 <= Limit) && (Primecandidate2 > Start);
-  typedef typename nextPrimesDirect<Start, Limit, K+1>::type nextIter;
-  typedef typename std::conditional<p1 && p2, 
-    typename typelist_cat<typelist<sint<Primecandidate1>, sint<Primecandidate2>>, nextIter>::type, 
-    typename std::conditional<p1, typename typelist_cat<sint<Primecandidate1>, nextIter>::type, 
-    typename std::conditional<p2, typename typelist_cat<sint<Primecandidate2>, nextIter>::type, nextIter>::type>::type>::type type;
-};
-
-template<int Start, int Limit, int K> 
-struct nextPrimesDirect<Start, Limit, K, false>
-{
-  typedef typelist<> type;
-};
 
 
 template<int Start, typename List> 

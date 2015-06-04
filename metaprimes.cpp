@@ -41,16 +41,28 @@ static const int_t LastQPrime = 11;
 #endif
 
 // #if !defined(CPP) || CPP != 11
-#include "metafactor.h"
 //typedef ListOfPrimes<LastQPrime,N>::Result PrimesList;
 // #else  // c++11
 // #include "metafactor11.h"
 // typedef ListOfPrimes<LastQPrime,N>::type PrimesList;
 // #endif
 
-#include "metaprimes.h"
 
-//typedef ListOfPrimes<7,2*3*5*7>::Result PList;
+#if !defined(CPP) || CPP != 11
+
+#include "metafactor.h"
+#include "metaprimes.h"
+typedef GeneratePrimesF2direct<N>::Result PrimesList;
+
+#else  // c++11
+
+#include "metafactor11.h"
+#include "metaprimes11.h"
+typedef GeneratePrimesF2direct<N>::type PrimesList;
+
+#endif
+
+
 
 int main(int argc, char *argv[])
 {
@@ -64,12 +76,11 @@ int main(int argc, char *argv[])
 //    typedef FilterRList<210,RList>::ExcludedPrimes PrimesList;
 
   //typedef TYPELIST_8(sint<1>,sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) RList;
-  typedef GeneratePrimesF2direct<1000>::Result PrimesList;
 //  typedef GenPrimes<5000>::Result PrimesList;
 
 //  typedef GenPrimes<1000>::Result PrimesList;
   typelist_out<PrimesList>::print(std::cout, '\n');
-  std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
+//   std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
 
   // Run-time check of the list
   if (CheckPrimesListAtRunTime<PrimesList>::apply())
