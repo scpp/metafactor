@@ -15,10 +15,46 @@
 #include <cmath>
 
 #include "metafactorcommon.h"
-
-#include "variadic_typelist.h"
-
 #include "metaprimes11.h"
+
+
+template<typename TList>
+struct Product;
+
+template<typename H, typename ...Tail>
+struct Product<typelist<H,Tail...> >
+{
+  static const int_t value = H::value * Product<typelist<Tail...>>::value;
+};
+
+template<typename H>
+struct Product<typelist<H> >
+{
+  static const int_t value = H::value;
+};
+
+template<>
+struct Product<typelist<>>
+{
+//  static const int_t value = 0;
+};
+
+#if MODE == 1
+typedef typelist<sint<3>,sint<2>> QFactorList;
+// static const int_t StartQ = 2*3;
+#elif MODE == 2
+typedef typelist<sint<5>,sint<3>,sint<2>> QFactorList;
+// static const int_t StartQ = 2*3*5;
+#elif MODE == 3
+typedef typelist<sint<7>,sint<5>,sint<3>,sint<2>> QFactorList;
+// static const int_t StartQ = 2*3*5*7;
+#elif MODE == 4
+typedef typelist<sint<11>,sint<7>,sint<5>,sint<3>,sint<2>> QFactorList;
+// static const int_t StartQ = 2*3*5*7*11;
+#endif
+
+static const int_t StartQ = Product<QFactorList>::value;
+
 
 template<typename TList>
 struct Check;
@@ -34,36 +70,6 @@ struct Check<typelist<>> {
 	static int_t get() {
     return 1;
   }
-};
-
-
-template<int Primecandidate, int K = 1,
-bool C1 = ((6*K+1)*(6*K+1) <= Primecandidate),
-bool C2 = ((Primecandidate % (6*K+1) != 0) && (Primecandidate % (6*K+5) != 0))> 
-struct IsPrime;
-
-template<int Primecandidate, int K> 
-struct IsPrime<Primecandidate, K, true, true>
-{
-  static const bool value = IsPrime<Primecandidate, K+1>::value;
-};
-
-template<int Primecandidate, int K> 
-struct IsPrime<Primecandidate, K, true, false>
-{
-  static const bool value = false;
-};
-
-template<int Primecandidate, int K> 
-struct IsPrime<Primecandidate, K, false, true>
-{
-  static const bool value = true;
-};
-
-template<int Primecandidate, int K> 
-struct IsPrime<Primecandidate, K, false, false>
-{
-  static const bool value = false;
 };
 
 
@@ -86,32 +92,30 @@ struct select_reminders<Start, typelist<T>>
 };
 
 
+template<int I = MODE-1, int_t Limit = StartQ, typename QFList = QFactorList>
+struct InitList;
 
-// Two alternatives, but similar implementations
-template<int Start, int Limit> 
-struct ListOfPrimes
+template<int I, int_t Limit, typename H, typename ...Tail>
+struct InitList<I, Limit, typelist<H,Tail...> >
 {
-  // Two different approaches to build the list of primes
-  // 1) Using the list builder nextPrimes
-  //    Each next candidate is checked using the existing growing list of primes starting with 'CheckList'
-//   typedef Loki::Typelist<sint<2>, Loki::Typelist<sint<3>, Loki::Typelist<sint<5>, Loki::NullType> > > StartList;
-//   typedef Loki::Typelist<sint<5>, Loki::NullType> CheckList;
-//   typedef typename Loki::TL::Append<StartList, typename nextPrimes<6, CheckList, Limit>::Result>::Result Result;
+  static const int_t NextLimit = Limit/H::value;
+  typedef InitList<I-1,NextLimit,typelist<Tail...>> Prev;
+  typedef GenPrimes<Limit,NextLimit,typename Prev::Reminders> Formula;
+  
+  typedef typename Formula::NextRList Reminders;
+  typedef typename typelist_cat<typename Prev::PrimesList, typename Formula::type>::type PrimesList;
+};
 
-  // 2) Using the list builder nextPrimesDirect
-  //    Each next candidate is checked using the numbers (6*k+1) and (6*k+5), which contain all the primes
-  //    This approach builds the list in one way without iterating it
-  //    That results in a smaller (2-3 times) compile-time than the first approach
-//    typedef typename Loki::Typelist<sint<2>, Loki::Typelist<sint<3>, Loki::Typelist<sint<5>, Loki::Typelist<sint<7>, Loki::Typelist<sint<11>, 
-//            typename nextPrimesDirect<Start, Limit, 1>::type> > > > > Result;
-   typedef typename typelist_cat<typelist<sint<2>, sint<3>, sint<5>, sint<7>, sint<11>>, 
-           typename nextPrimesDirect<Start, Limit, 1>::type>::type type;
+template<int_t Limit, typename H, typename ...Tail>
+struct InitList<0, Limit, typelist<H, Tail...> >
+{
+  typedef typelist<sint<5>> Reminders;
+  typedef typelist<sint<2>, sint<3>, sint<5>> PrimesList;
 };
 
 
-typedef ListOfPrimes<LastQPrime,StartQ>::type InitialPrimesList;
-typedef typelist_cat<sint<1>,select_reminders<LastQPrime,InitialPrimesList>::type>::type Reminders;
-
+typedef InitList<>::PrimesList InitialPrimesList;
+typedef InitList<>::Reminders  Reminders;
 
 
 template<int_t N, unsigned int Q, int_t K, typename RList>
@@ -147,8 +151,8 @@ struct factor_loop<N,Q,K,typelist<H,Tail...>,false>
   typedef typename std::conditional<(trial::power > 0),typename typelist_cat<T,nextIter>::type, nextIter>::type type;
 };
 
-template<int_t N, unsigned int Q, int_t K, typename H, typename ...Tail>
-struct factor_loop<N,Q,K,typelist<H,Tail...>,true>
+template<int_t N, unsigned int Q, int_t K, typename RList>
+struct factor_loop<N,Q,K,RList,true>
 : public factor_loop<N,Q,K,typelist<>,true> {};
 
 template<int_t N, unsigned int Q, int_t K>

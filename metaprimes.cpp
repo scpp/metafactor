@@ -16,10 +16,10 @@
 #include "sint.h"
 
 // This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
-#if !defined(NUM) || NUM == 0 
+#if !defined(LIMIT) || LIMIT == 0 
 static const int_t N = 100;
 #else
-static const int_t N = NUM;
+static const int_t N = LIMIT;
 #endif
 
 #ifndef MODE
@@ -40,13 +40,6 @@ static const int_t StartQ = 2*3*5*7*11;
 static const int_t LastQPrime = 11;
 #endif
 
-// #if !defined(CPP) || CPP != 11
-//typedef ListOfPrimes<LastQPrime,N>::Result PrimesList;
-// #else  // c++11
-// #include "metafactor11.h"
-// typedef ListOfPrimes<LastQPrime,N>::type PrimesList;
-// #endif
-
 
 #if !defined(CPP) || CPP != 11
 
@@ -66,19 +59,7 @@ typedef GeneratePrimesF2direct<N>::type PrimesList;
 
 int main(int argc, char *argv[])
 {
-//  typedef Loki::Typelist<sint<5>,Loki::NullType> RList5;
-//   typedef TYPELIST_7(sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) RList;
-//   typedef FilterRList<210,typename RList::Tail,11> Filter;
-//   typedef Loki::Typelist<typename RList::Head, typename Filter::CheckPrimes> PrimesToCheck;
-//  typedef GenPrimesFormula<210,30,1,RList,PrimesToCheck>::Result PrimesList;
-//   typedef GenPrimesFormula<210,30,1,RList>::Result PrimesList30;
-//   typedef Loki::TL::Append<PrimesList5,Loki::Typelist<sint<31>,PrimesList30> >::Result PList;
-//    typedef FilterRList<210,RList>::ExcludedPrimes PrimesList;
 
-  //typedef TYPELIST_8(sint<1>,sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) RList;
-//  typedef GenPrimes<5000>::Result PrimesList;
-
-//  typedef GenPrimes<1000>::Result PrimesList;
   typelist_out<PrimesList>::print(std::cout, '\n');
 //   std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
 

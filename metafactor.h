@@ -19,6 +19,42 @@
 
 #include "Typelist.h"
 
+template<typename TList>
+struct Product;
+
+template<typename H, typename Tail>
+struct Product<Loki::Typelist<H,Tail> >
+{
+  static const int_t value = H::value * Product<Tail>::value;
+};
+
+template<typename H>
+struct Product<Loki::Typelist<H,Loki::NullType> >
+{
+  static const int_t value = H::value;
+};
+
+template<>
+struct Product<Loki::NullType>
+{ }; // compilt-time error
+
+
+#if MODE == 1
+typedef TYPELIST_2(sint<3>,sint<2>) QFactorList;
+// static const int_t StartQ = 2*3;
+#elif MODE == 2
+typedef TYPELIST_3(sint<5>,sint<3>,sint<2>) QFactorList;
+// static const int_t StartQ = 2*3*5;
+#elif MODE == 3
+typedef TYPELIST_4(sint<7>,sint<5>,sint<3>,sint<2>) QFactorList;
+// static const int_t StartQ = 2*3*5*7;
+#elif MODE == 4
+typedef TYPELIST_5(sint<11>,sint<7>,sint<5>,sint<3>,sint<2>) QFactorList;
+// static const int_t StartQ = 2*3*5*7*11;
+#endif
+
+static const int_t StartQ = Product<QFactorList>::value;
+
 template<typename List>
 struct typelist_out;
 
@@ -81,26 +117,30 @@ struct Print<Loki::Typelist<Head,Tail> > {
 };
 
 
-template<int I = MODE-1>
-struct InitList 
+template<int I = MODE-1, int_t Limit = StartQ, typename QFList = QFactorList>
+struct InitList;
+
+template<int I, int_t Limit, typename H, typename Tail>
+struct InitList<I, Limit, Loki::Typelist<H,Tail> >
 {
-  typedef InitList<I-1> Prev;
-  typedef GenPrimes<StartQ,StartQ/LastQPrime,typename Prev::Reminders> Formula;
+  static const int_t NextLimit = Limit/H::value;
+  typedef InitList<I-1,NextLimit,Tail> Prev;
+  typedef GenPrimes<Limit,NextLimit,typename Prev::Reminders> Formula;
   
   typedef typename Formula::NextRList Reminders;
   typedef typename Loki::TL::Append<typename Prev::PrimesList, typename Formula::Result>::Result PrimesList;
 };
 
-template<>
-struct InitList<0>
+template<int_t Limit, typename H, typename Tail>
+struct InitList<0, Limit, Loki::Typelist<H,Tail> >
 {
   typedef TYPELIST_1(sint<5>) Reminders;
   typedef TYPELIST_3(sint<2>, sint<3>, sint<5>) PrimesList;
 };
 
 
-typedef InitList<MODE>::PrimesList InitialPrimesList;
-typedef InitList<MODE>::Reminders  Reminders;
+typedef InitList<>::PrimesList InitialPrimesList;
+typedef InitList<>::Reminders  Reminders;
  
 // typedef TYPELIST_1(sint<5>) Reminders1;
 // typedef TYPELIST_3(sint<2>, sint<3>, sint<5>) InitialPrimesList1;
@@ -146,19 +186,19 @@ struct FactorLoop<N,Q,K,Loki::Typelist<H,Tail>,false>
   static const int_t candidate = Q*K + H::value;
   typedef try_factor<N, candidate> trial;
   typedef spair<sint<candidate>, sint<trial::power> > T;
-  typedef typename FactorLoop<N/trial::factor, Q, K, Tail, (candidate*candidate > N)>::type nextIter;
+  typedef typename FactorLoop<N/trial::factor, Q, K, Tail, (candidate*candidate > N)>::Result nextIter;
   typedef typename Loki::Select<(trial::power > 0), Loki::Typelist<T,nextIter>, nextIter>::Result Result;
 };
 
-template<int_t N, unsigned int Q, int_t K, typename H, typename Tail>
-struct FactorLoop<N,Q,K,Loki::Typelist<H,Tail>,true>
+template<int_t N, unsigned int Q, int_t K, typename RList>
+struct FactorLoop<N,Q,K,RList,true>
 : public FactorLoop<N,Q,K,Loki::NullType,true> {};
 
 template<int_t N, unsigned int Q, int_t K>
 struct FactorLoop<N,Q,K,Loki::NullType,false>
 {
   static const int_t Candidate = Q*(K+1) + 1;
-  typedef typename SelectFactors<N,Q,K+1,Reminders>::type RList;
+  typedef typename SelectFactors<N,Q,K+1,Reminders>::Result RList;
   typedef typename FactorLoop<N,Q,K+1,RList,(Candidate*Candidate > N)>::Result Result;
 };
 

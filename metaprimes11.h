@@ -171,20 +171,27 @@ struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,typelist<>,true>
 
 
 
-template<int_t Q, typename List, int_t N>
+template<int_t Q, typename List, typename N>
 struct FilterRemindersList;
 
-template<int_t Q, typename H, typename ...Tail, int_t N>
+template<int_t Q, typename H, typename ...Tail, typename N>
 struct FilterRemindersList<Q, typelist<H, Tail...>, N>
 {
-  static const bool C = (N*H::value < Q);
+  static const bool C = (N::value*H::value < Q);
   typedef FilterRemindersList<Q,typelist<Tail...>,N> Next;
   typedef typename std::conditional<C, typename typelist_cat<H,typename Next::ExcludedPrimes>::type, typelist<>>::type ExcludedPrimes;
   typedef typename std::conditional<C, typename Next::CheckPrimes, typelist<H, Tail...>>::type CheckPrimes;
 };
 
-template<int_t Q, int_t N>
+template<int_t Q, typename N>
 struct FilterRemindersList<Q, typelist<>, N>
+{
+  typedef typelist<> ExcludedPrimes;
+  typedef typelist<> CheckPrimes;
+};
+
+template<int_t Q>
+struct FilterRemindersList<Q, typelist<>, typelist<>>
 {
   typedef typelist<> ExcludedPrimes;
   typedef typelist<> CheckPrimes;
@@ -225,32 +232,20 @@ struct EliminateNonPrimes<List, typelist<>>
 };
 
 
-template<typename T>
-struct GetFirstNumberInList
-{
-  static const int_t value = T::Head::value;
-};
-
-template<>
-struct GetFirstNumberInList<typelist<>>
-{
-  static const int_t value = 1;
-};
-
 template<int_t Limit, int_t StartQ=6, 
 typename StartRList = typelist<sint<5>>, bool doExit = false>
 struct GenPrimes;
 
-template<int_t Limit, int_t Q, typename RList>
-struct GenPrimes<Limit,Q,RList,false>
+template<int_t Limit, int_t Q, typename H, typename ...Tail>
+struct GenPrimes<Limit,Q,typelist<H,Tail...>,false>
 {
-  static const int_t NextQ = Q*RList::Head::value;
-  typedef FilterRemindersList<NextQ,typename RList::Tail,GetFirstNumberInList<typename RList::Tail>::value> Filter;
-  typedef typename typelist_cat<typename RList::Head, typename Filter::CheckPrimes>::type PrimesToCheck;
+  static const int_t NextQ = Q*H::value;
+  typedef FilterRemindersList<NextQ,typelist<Tail...>,typename get_first<typelist<Tail...>>::type> Filter;
+  typedef typename typelist_cat<H, typename Filter::CheckPrimes>::type PrimesToCheck;
   typedef typename typelist_cat<sint<Q+1>,   // Q+1 is always prime and should not be checked
-    typename GenPrimesFormula<(NextQ<Limit) ? NextQ : Limit,Q,1,RList,PrimesToCheck>::type>::type NewList;
+    typename GenPrimesFormula<(NextQ<Limit) ? NextQ : Limit,Q,1,typelist<H,Tail...>,PrimesToCheck>::type>::type NewList;
   typedef typename EliminateNonPrimes<NewList,typename Filter::ExcludedPrimes>::type PrimesList;
-  typedef typename typelist_cat<typename RList::Tail, NewList>::type NextRList;
+  typedef typename typelist_cat<typelist<Tail...>, NewList>::type NextRList;
   typedef typename GenPrimes<Limit, NextQ, NextRList, (NextQ+1 > Limit)>::type NextIter;
   typedef typename typelist_cat<PrimesList,NextIter>::type type;
 };

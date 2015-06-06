@@ -18,6 +18,28 @@
 template <class... T> struct typelist { };
 
 
+template <typename TList> 
+struct get_first;
+
+template <typename T, typename ...List> 
+struct get_first<typelist<T,List...>>
+{
+  typedef T type;
+};
+
+template <typename T> 
+struct get_first<typelist<T>>
+{
+  typedef T type;
+};
+
+template <> 
+struct get_first<typelist<>>
+{
+  typedef typelist<> type;
+};
+
+
 template <typename List1, typename List2> 
 struct typelist_cat;
 

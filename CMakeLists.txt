@@ -6,20 +6,24 @@ set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_BUILD_TYPE Release)
 
 add_executable(metafactor metafactor.cpp)
-add_executable(metaprimes metaprimes.cpp)
+#add_executable(metaprimes metaprimes.cpp)
 
 # Set default values 
 if(NOT DEFINED ${CPP})
 set(CPP "11" CACHE STRING "")
 endif(NOT DEFINED ${CPP})
 
+if(NOT DEFINED ${MODE})
+set(MODE "3" CACHE STRING "")
+endif(NOT DEFINED ${MODE})
+
 if(NOT DEFINED ${NUM})
 set(NUM "0" CACHE STRING "")
 endif(NOT DEFINED ${NUM})
 
-if(NOT DEFINED ${MODE})
-set(MODE "3" CACHE STRING "")
-endif(NOT DEFINED ${MODE})
+if(NOT DEFINED ${LIMIT})
+set(NUM "100" CACHE STRING "")
+endif(NOT DEFINED ${LIMIT})
 
 
 if(CMAKE_CXX_COMPILER MATCHES "cl.exe")
@@ -36,4 +40,4 @@ add_definitions(-time -O3 -std=c++11 -ftemplate-depth-1000000 -DCPP=${CPP} -DNUM
 endif(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
 target_link_libraries(metafactor stdc++)
-target_link_libraries(metaprimes stdc++)
+#target_link_libraries(metaprimes stdc++)
