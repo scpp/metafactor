@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 2.6)
 project(metafactor)
 
+# Tested with compilers
 set(CMAKE_CXX_COMPILER g++)
+#set(CMAKE_CXX_COMPILER clang)
+#set(CMAKE_CXX_COMPILER icpc)
+#set(CMAKE_CXX_COMPILER cl.exe)
 
 set(CMAKE_BUILD_TYPE Release)
 
 add_executable(metafactor metafactor.cpp)
-#add_executable(metaprimes metaprimes.cpp)
+add_executable(metaprimes metaprimes.cpp)
 
 # Set default values 
 if(NOT DEFINED ${CPP})
@@ -29,15 +33,18 @@ endif(NOT DEFINED ${LIMIT})
 if(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
 ### MSVC compiler
-set(CMAKE_BUILD_TYPE Release)
 add_definitions(/D CPP=${CPP} /D NUM=${NUM} /D MODE=${MODE})
+
+target_link_libraries(metafactor)
+target_link_libraries(metaprimes)
 
 else(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
 ### GCC, Clang and Intel compilers
 add_definitions(-time -O3 -std=c++11 -ftemplate-depth-1000000 -DCPP=${CPP} -DNUM=${NUM} -DMODE=${MODE})
 
+target_link_libraries(metafactor stdc++)
+target_link_libraries(metaprimes stdc++)
+
 endif(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
-target_link_libraries(metafactor stdc++)
-#target_link_libraries(metaprimes stdc++)

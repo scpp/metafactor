@@ -26,20 +26,6 @@ static const int_t N = LIMIT;
 #define MODE 3
 #endif
 
-#if MODE == 1
-static const int_t StartQ = 2*3;
-static const int_t LastQPrime = 3;
-#elif MODE == 2
-static const int_t StartQ = 2*3*5;
-static const int_t LastQPrime = 5;
-#elif MODE == 3
-static const int_t StartQ = 2*3*5*7;
-static const int_t LastQPrime = 7;
-#elif MODE == 4
-static const int_t StartQ = 2*3*5*7*11;
-static const int_t LastQPrime = 11;
-#endif
-
 
 #if !defined(CPP) || CPP != 11
 
