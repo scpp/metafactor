@@ -26,16 +26,17 @@
 //static const int_t N = 90004200049;  // = 300007^2
 //static const int_t N = 429496729091; // a prime above unsigned int range
 
+// The cases I couldn't compile with g++ 4.8.3
 //static const int_t N = 184467440737095497;
-static const int_t N = 9223372036854775806; 
+//static const int_t N = 9223372036854775806; 
 //static const int_t N = 18446744073709551613;
 
-// This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
-// #if !defined(NUM) || NUM == 0 
-// static const int_t N = 18446744073709551615;
-// #else
-// static const int_t N = NUM;
-// #endif
+//This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
+#if !defined(NUM) || NUM == 0 
+static const int_t N = 18446744073709551615;
+#else
+static const int_t N = NUM;
+#endif
 
 #ifndef MODE
 #define MODE 3
