@@ -31,7 +31,7 @@
 //static const int_t N = 9223372036854775806; 
 //static const int_t N = 18446744073709551613;
 
-//This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
+//This is a workaround for compilers that could not pass such a long integer as a preprocessor definition
 #if !defined(NUM) || NUM == 0 
 static const int_t N = 18446744073709551615;
 #else
@@ -62,9 +62,7 @@ int main(int argc, char *argv[])
     //std::cout << std::numeric_limits<unsigned long>::max() << std::endl;
   
 //     typelist_out<InitialPrimesList>::print();
-//     std::cout << Loki::TL::Length<InitialPrimesList>::value << std::endl;
 //     typelist_out<Reminders>::print();
-//     std::cout << Loki::TL::Length<Reminders>::value << std::endl;
     
     typelist_out<FList>::print();
     std::cout << N << std::endl << Check<FList>::get() << std::endl;

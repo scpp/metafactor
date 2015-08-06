@@ -61,13 +61,13 @@ struct Check;
 
 template<typename H, typename ...Tail>
 struct Check<typelist<H,Tail...> > {
-	static int_t get() {
+  static int_t get() {
     return ipow<H::first::value, H::second::value>::value * Check<typelist<Tail...>>::get();
   }
 };
 template<>
 struct Check<typelist<>> {
-	static int_t get() {
+  static int_t get() {
     return 1;
   }
 };
@@ -80,15 +80,15 @@ struct select_reminders;
 template<int Start, typename T, typename ...List> 
 struct select_reminders<Start, typelist<T, List...>>
 {
-  typedef typename select_reminders<Start, typelist<List...>>::type next;
-  typedef typename std::conditional<(Start < T::value),typename typelist_cat<T,next>::type,
-     next>::type type;
+  using next = typename select_reminders<Start, typelist<List...>>::type;
+  using type = typename std::conditional<(Start < T::value), 
+               typename typelist_cat<T,next>::type, next>::type;
 };
 
 template<int Start, typename T> 
 struct select_reminders<Start, typelist<T>>
 {
-  typedef typelist<T> type;
+  using type = typelist<T>;
 };
 
 
@@ -99,23 +99,23 @@ template<int I, int_t Limit, typename H, typename ...Tail>
 struct InitList<I, Limit, typelist<H,Tail...> >
 {
   static const int_t NextLimit = Limit/H::value;
-  typedef InitList<I-1,NextLimit,typelist<Tail...>> Prev;
-  typedef GenPrimes<Limit,NextLimit,typename Prev::Reminders> Formula;
+  using Prev = InitList<I-1,NextLimit,typelist<Tail...>>;
+  using Formula = GenPrimes<Limit,NextLimit,typename Prev::Reminders>;
   
-  typedef typename Formula::NextRList Reminders;
-  typedef typename typelist_cat<typename Prev::PrimesList, typename Formula::type>::type PrimesList;
+  using Reminders = typename Formula::NextRList;
+  using PrimesList = typename typelist_cat<typename Prev::PrimesList, typename Formula::type>::type;
 };
 
 template<int_t Limit, typename H, typename ...Tail>
 struct InitList<0, Limit, typelist<H, Tail...> >
 {
-  typedef typelist<sint<5>> Reminders;
-  typedef typelist<sint<2>, sint<3>, sint<5>> PrimesList;
+  using Reminders = typelist<sint<5>>;
+  using PrimesList = typelist<sint<2>, sint<3>, sint<5>>;
 };
 
 
-typedef InitList<>::PrimesList InitialPrimesList;
-typedef InitList<>::Reminders  Reminders;
+using InitialPrimesList = InitList<>::PrimesList;
+using Reminders = InitList<>::Reminders;
 
 
 template<int_t N, unsigned int Q, int_t K, typename RList>
@@ -125,15 +125,14 @@ template<int_t N, unsigned int Q, int_t K, typename H, typename ...Tail>
 struct select_factors<N,Q,K,typelist<H,Tail...> >
 {
   static const int_t candidate = Q*K + H::value;
-  typedef typename select_factors<N,Q,K,typelist<Tail...>>::type next;
-  typedef typename std::conditional<(N % candidate == 0), 
-          typename typelist_cat<H,next>::type, next>::type type;
+  using next = typename select_factors<N,Q,K,typelist<Tail...>>::type;
+  using type = typename std::conditional<(N % candidate == 0), typename typelist_cat<H,next>::type, next>::type;
 };
 
 template<int_t N, unsigned int Q, int_t K>
 struct select_factors<N,Q,K,typelist<> >
 {
-  typedef typelist<> type;
+  using type = typelist<>;
 };
 
 
@@ -145,10 +144,10 @@ template<int_t N, unsigned int Q, int_t K, typename H, typename ...Tail>
 struct factor_loop<N,Q,K,typelist<H,Tail...>,false>
 {
   static const int_t candidate = Q*K + H::value;
-  typedef try_factor<N, candidate> trial;
-  typedef spair<sint<candidate>, sint<trial::power> > T;
-  typedef typename factor_loop<N/trial::factor, Q, K, typelist<Tail...>, (candidate*candidate > N)>::type nextIter;
-  typedef typename std::conditional<(trial::power > 0),typename typelist_cat<T,nextIter>::type, nextIter>::type type;
+  using trial = try_factor<N, candidate>;
+  using T = spair<sint<candidate>, sint<trial::power> >;
+  using nextIter = typename factor_loop<N/trial::factor, Q, K, typelist<Tail...>, (candidate*candidate > N)>::type;
+  using type = typename std::conditional<(trial::power > 0), typename typelist_cat<T,nextIter>::type, nextIter>::type;
 };
 
 template<int_t N, unsigned int Q, int_t K, typename RList>
@@ -159,27 +158,26 @@ template<int_t N, unsigned int Q, int_t K>
 struct factor_loop<N,Q,K,typelist<>,false>
 {
   static const int_t candidate = Q*(K+1) + 1;
-  typedef typename select_factors<N,Q,K+1,Reminders>::type RList;
-  typedef typename factor_loop<N,Q,K+1,RList,(candidate*candidate > N)>::type type;
+  using RList = typename select_factors<N,Q,K+1,Reminders>::type;
+  using type = typename factor_loop<N,Q,K+1,RList,(candidate*candidate > N)>::type;
 };
 
 template<int_t N, unsigned int Q, int_t K>
 struct factor_loop<N,Q,K,typelist<>,true>
 {
-  typedef spair<sint<N>, sint<1> > T;
-  typedef typelist<T> type;
+  using type = typelist<spair<sint<N>, sint<1>>>;
 };
 
 template<unsigned int Q, int_t K, typename RList>
 struct factor_loop<1,Q,K,RList,true>
 {
-  typedef typelist<> type;
+  using type = typelist<>;
 };
 
 template<unsigned int Q, int_t K>
 struct factor_loop<1,Q,K,typelist<>,true>
 {
-  typedef typelist<> type;
+  using type = typelist<>;
 };
 
 
@@ -194,13 +192,13 @@ template<int_t N, unsigned int Q, typename H, typename ...Tail>
 struct factorization<sint<N>, Q, typelist<H,Tail...> >
 {
   static const int_t candidate = H::value;
-  typedef try_factor<N, candidate> trial;
+  using trial = try_factor<N, candidate>;
   static const int_t P = trial::power;
-  typedef spair<sint<candidate>, sint<P> > T;
-  typedef sint<N/trial::factor> nextN;
-  typedef typename factorization<nextN,Q,typelist<Tail...>>::type next;
-  typedef typename std::conditional<(P > 0), 
-     typename typelist_cat<T, next>::type, next>::type type;
+  using T = spair<sint<candidate>, sint<P> >;
+  using nextN = sint<N/trial::factor>;
+  using next = typename factorization<nextN,Q,typelist<Tail...>>::type;
+  using type = typename std::conditional<(P > 0), 
+     typename typelist_cat<T, next>::type, next>::type;
 };
 
 // Further factorization 
@@ -208,19 +206,19 @@ template<int_t N, unsigned int Q>
 struct factorization<sint<N>, Q, typelist<> > 
 {
   static const int_t candidate = Q + 1;
-  typedef typename select_factors<N,Q,1,Reminders>::type RList;
-  typedef typename factor_loop<N,Q,1,RList,(candidate*candidate > N)>::type type;
+  using RList = typename select_factors<N,Q,1,Reminders>::type;
+  using type = typename factor_loop<N,Q,1,RList,(candidate*candidate > N)>::type;
 };
 
 // End of factorization
 template<unsigned int Q, typename H, typename ...List>
 struct factorization<sint<1>, Q, typelist<H, List...> > {
-  typedef typelist<> type;
+  using type = typelist<>;
 };
 
 template<unsigned int Q>
 struct factorization<sint<1>, Q, typelist<> > {
-  typedef typelist<> type;
+  using type = typelist<>;
 };
 
 
