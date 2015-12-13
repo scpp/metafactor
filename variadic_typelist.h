@@ -46,19 +46,19 @@ struct typelist_cat;
 template <typename ...List1, typename ...List2>
 struct typelist_cat<typelist<List1...>, typelist<List2...>>
 {
-  typedef typelist<List1..., List2...> type;
+  using type = typelist<List1..., List2...>;
 };
 
 template <typename T, typename ...List2>
 struct typelist_cat<T, typelist<List2...>>
 {
-  typedef typelist<T, List2...> type;
+  using type = typelist<T, List2...>;
 };
 
 template <typename T, typename ...List1>
 struct typelist_cat<typelist<List1...>,T>
 {
-  typedef typelist<List1... ,T> type;
+  using type = typelist<List1... ,T>;
 };
 
 

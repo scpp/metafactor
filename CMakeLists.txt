@@ -41,7 +41,7 @@ target_link_libraries(metaprimes)
 else(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
 ### GCC, Clang and Intel compilers
-add_definitions(-time -O3 -std=c++11 -ftemplate-depth-1000000 -DCPP=${CPP} -DNUM=${NUM} -DMODE=${MODE})
+add_definitions(-time -O3 -Wall -std=c++11 -ftemplate-depth-1000000 -DCPP=${CPP} -DNUM=${NUM} -DMODE=${MODE})
 
 target_link_libraries(metafactor stdc++)
 target_link_libraries(metaprimes stdc++)
