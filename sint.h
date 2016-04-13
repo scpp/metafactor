@@ -13,7 +13,7 @@
 #define __sint_h
 
 #ifdef _MSC_VER
-typedef unsigned __int64 int_t;
+typedef unsigned __int64 uint_t;
 #else
 typedef unsigned long uint_t;
 #endif
