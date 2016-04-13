@@ -15,7 +15,7 @@
 #ifdef _MSC_VER
 typedef unsigned __int64 int_t;
 #else
-typedef unsigned long int_t;
+typedef unsigned long uint_t;
 #endif
 //typedef unsigned long uint_t;
 typedef unsigned short short_t;
@@ -26,10 +26,10 @@ typedef unsigned short short_t;
         them for particular number-container.
  \param N an integer number
 */
-template<int_t N>
+template<uint_t N>
 struct sint {
-  typedef int_t value_type;
-  static const int_t value = N;
+  typedef uint_t value_type;
+  static const uint_t value = N;
 };
 
 template<typename T1, typename T2>

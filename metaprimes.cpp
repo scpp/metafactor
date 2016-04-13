@@ -17,9 +17,9 @@
 
 // This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
 #if !defined(LIMIT) || LIMIT == 0 
-static const int_t N = 100;
+static const uint_t N = 100;
 #else
-static const int_t N = LIMIT;
+static const uint_t N = LIMIT;
 #endif
 
 #ifndef MODE

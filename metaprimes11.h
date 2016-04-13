@@ -67,14 +67,14 @@ template<int Limit, int K>
 struct nextPrimesDirect30<Limit, K, true>
 {
   typedef IsPrime30<CheckSmallPrimes7_29> isPrime;
-  static const int_t C1 = 30*K + 1;
-  static const int_t C2 = 30*K + 7;
-  static const int_t C3 = 30*K + 11;
-  static const int_t C4 = 30*K + 13;
-  static const int_t C5 = 30*K + 17;
-  static const int_t C6 = 30*K + 19;
-  static const int_t C7 = 30*K + 23;
-  static const int_t C8 = 30*K + 29;
+  static const uint_t C1 = 30*K + 1;
+  static const uint_t C2 = 30*K + 7;
+  static const uint_t C3 = 30*K + 11;
+  static const uint_t C4 = 30*K + 13;
+  static const uint_t C5 = 30*K + 17;
+  static const uint_t C6 = 30*K + 19;
+  static const uint_t C7 = 30*K + 23;
+  static const uint_t C8 = 30*K + 29;
   static const bool p1 = isPrime::Do<C1>::value;
   static const bool p2 = isPrime::Do<C2>::value && (C2 <= Limit);
   static const bool p3 = isPrime::Do<C3>::value && (C3 <= Limit);
@@ -102,29 +102,29 @@ struct nextPrimesDirect30<Limit, K, false>
 };
 
 // Returns true, if Candidate is not divisible by any entry of TrialList
-template<int_t Candidate, typename TrialList, bool doExit = false>
+template<uint_t Candidate, typename TrialList, bool doExit = false>
 struct isNotDivisibleByListMembers;
 
-template<int_t Candidate, typename H, typename ...Tail>
+template<uint_t Candidate, typename H, typename ...Tail>
 struct isNotDivisibleByListMembers<Candidate,typelist<H,Tail...>,false>
 {
   static const bool value = (Candidate % H::value != 0) && 
          isNotDivisibleByListMembers<Candidate,typelist<Tail...>,(H::value*H::value >= Candidate)>::value;
 };
 
-template<int_t Candidate>
+template<uint_t Candidate>
 struct isNotDivisibleByListMembers<Candidate,typelist<>,false>
 {
   static const bool value = true;
 };
 
-template<int_t Candidate, typename H, typename ...Tail>
+template<uint_t Candidate, typename H, typename ...Tail>
 struct isNotDivisibleByListMembers<Candidate,typelist<H,Tail...>,true>
 {
   static const bool value = true;
 };
 
-template<int_t Candidate>
+template<uint_t Candidate>
 struct isNotDivisibleByListMembers<Candidate,typelist<>,true>
 {
   static const bool value = true;
@@ -132,38 +132,38 @@ struct isNotDivisibleByListMembers<Candidate,typelist<>,true>
 
 // Generate all primes less equal Limit with a constant Q in the formula Q*K+R
 // Second exit criteria: (K+1 == InitRList::Head::value)
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors,
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors,
          typename RemindersList = InitRList, bool doExit = false>
 struct GenPrimesFormula;
 
 // Next loop step over RList
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors, typename H, typename ...Tail>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors, typename H, typename ...Tail>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,typelist<H,Tail...>,false>
 {
-  static const int_t candidate = Q*K + H::value;
+  static const uint_t candidate = Q*K + H::value;
   typedef typename GenPrimesFormula<Limit, Q, K, InitRList, CheckFactors, typelist<Tail...>, (candidate > Limit)>::type nextIter;
   typedef typename std::conditional<(candidate <= Limit && isNotDivisibleByListMembers<candidate, CheckFactors>::value), 
           typename typelist_cat<sint<candidate>,nextIter>::type, nextIter>::type type;
 };
 
 // Next loop step over K
-template<int_t Limit, int_t Q, int_t K, typename Head, typename ...List, typename CheckFactors>
+template<uint_t Limit, uint_t Q, uint_t K, typename Head, typename ...List, typename CheckFactors>
 struct GenPrimesFormula<Limit,Q,K,typelist<Head,List...>,CheckFactors,typelist<>,false>
 {
   typedef typelist<Head,List...> InitRList;
-  static const int_t candidate = Q*(K+1) + 1;
+  static const uint_t candidate = Q*(K+1) + 1;
   typedef typename GenPrimesFormula<Limit, Q, K+1, InitRList, CheckFactors, InitRList, (K+1 == Head::value)>::type nextIter;
   typedef typename std::conditional<(candidate <= Limit && (K+1 < Head::value) && isNotDivisibleByListMembers<candidate, CheckFactors>::value), 
           typename typelist_cat<sint<candidate>,nextIter>::type, nextIter>::type type;
 };
 
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors, typename H, typename ...Tail>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors, typename H, typename ...Tail>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,typelist<H,Tail...>,true>
 {
   typedef typelist<> type;
 };
 
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckFactors>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,typelist<>,true>
 {
   typedef typelist<> type;
@@ -171,10 +171,10 @@ struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,typelist<>,true>
 
 
 
-template<int_t Q, typename List, typename N>
+template<uint_t Q, typename List, typename N>
 struct FilterRemindersList;
 
-template<int_t Q, typename H, typename ...Tail, typename N>
+template<uint_t Q, typename H, typename ...Tail, typename N>
 struct FilterRemindersList<Q, typelist<H, Tail...>, N>
 {
   static const bool C = (N::value*H::value < Q);
@@ -183,14 +183,14 @@ struct FilterRemindersList<Q, typelist<H, Tail...>, N>
   typedef typename std::conditional<C, typename Next::CheckPrimes, typelist<H, Tail...>>::type CheckPrimes;
 };
 
-template<int_t Q, typename N>
+template<uint_t Q, typename N>
 struct FilterRemindersList<Q, typelist<>, N>
 {
   typedef typelist<> ExcludedPrimes;
   typedef typelist<> CheckPrimes;
 };
 
-template<int_t Q>
+template<uint_t Q>
 struct FilterRemindersList<Q, typelist<>, typelist<>>
 {
   typedef typelist<> ExcludedPrimes;
@@ -198,17 +198,17 @@ struct FilterRemindersList<Q, typelist<>, typelist<>>
 };
 
 
-template<typename List, int_t N>
+template<typename List, uint_t N>
 struct EliminateNonPrimesLoop;
 
-template<typename H, typename ...Tail, int_t N>
+template<typename H, typename ...Tail, uint_t N>
 struct EliminateNonPrimesLoop<typelist<H, Tail...>, N>
 {
   typedef typename EliminateNonPrimesLoop<typelist<Tail...>,N>::type Next;
   typedef typename std::conditional<(H::value%N != 0), typename typelist_cat<H,Next>::type, Next>::type type;
 };
 
-template<int_t N>
+template<uint_t N>
 struct EliminateNonPrimesLoop<typelist<>,N>
 {
   typedef typelist<> type;
@@ -232,14 +232,14 @@ struct EliminateNonPrimes<List, typelist<>>
 };
 
 
-template<int_t Limit, int_t StartQ=6, 
+template<uint_t Limit, uint_t StartQ=6, 
 typename StartRList = typelist<sint<5>>, bool doExit = false>
 struct GenPrimes;
 
-template<int_t Limit, int_t Q, typename H, typename ...Tail>
+template<uint_t Limit, uint_t Q, typename H, typename ...Tail>
 struct GenPrimes<Limit,Q,typelist<H,Tail...>,false>
 {
-  static const int_t NextQ = Q*H::value;
+  static const uint_t NextQ = Q*H::value;
   typedef FilterRemindersList<NextQ,typelist<Tail...>,typename get_first<typelist<Tail...>>::type> Filter;
   typedef typename typelist_cat<H, typename Filter::CheckPrimes>::type PrimesToCheck;
   typedef typename typelist_cat<sint<Q+1>,   // Q+1 is always prime and should not be checked
@@ -250,7 +250,7 @@ struct GenPrimes<Limit,Q,typelist<H,Tail...>,false>
   typedef typename typelist_cat<PrimesList,NextIter>::type type;
 };
 
-template<int_t Limit, int_t Q, typename RList>
+template<uint_t Limit, uint_t Q, typename RList>
 struct GenPrimes<Limit,Q,RList,true>
 {
   typedef typelist<> type;
@@ -260,36 +260,36 @@ struct GenPrimes<Limit,Q,RList,true>
 
 // Generate all primes less equal Limit with a constant Q in the formula Q*K+R
 // Similar to GenPrimesFormula, but without second exit condition
-template<int_t Limit, int_t Q, int_t K, typename InitRList, 
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, 
          typename CheckPrimeCandidate = IsPrime6<>,
          typename RList = InitRList, bool doExit = false>
 struct GeneratePrimes;
 
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename H, typename ...Tail, typename CheckPrimeCandidate>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename H, typename ...Tail, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,typelist<H,Tail...>,false>
 {
-  static const int_t candidate = Q*K + H::value;
+  static const uint_t candidate = Q*K + H::value;
   typedef typename GeneratePrimes<Limit, Q, K, InitRList, CheckPrimeCandidate, Tail..., (candidate > Limit)>::type nextIter;
   typedef typename std::conditional<(candidate <= Limit && CheckPrimeCandidate::template Do<candidate>::value), 
           typename typelist_cat<sint<candidate>,nextIter>::type, nextIter>::type type;
 };
 
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckPrimeCandidate>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,typelist<>,false>
 : public GeneratePrimes<Limit, Q, K+1, InitRList> {};
 
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename H, typename ...Tail, typename CheckPrimeCandidate>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename H, typename ...Tail, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,typelist<H,Tail...>,true>
 { typedef typelist<> type; };
 
-template<int_t Limit, int_t Q, int_t K, typename InitRList, typename CheckPrimeCandidate>
+template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,typelist<>,true>
 { typedef typelist<> type; };
 
 
 typedef typelist<sint<2>,sint<3>,sint<5>> typelist235;
 
-template<int_t Limit>
+template<uint_t Limit>
 struct GeneratePrimesF1
 {
   typedef typelist<sint<5>> List1;
@@ -301,7 +301,7 @@ struct GeneratePrimesF1
 };
 
 
-template<int_t Limit>
+template<uint_t Limit>
 struct GeneratePrimesF1direct
 {
   typedef typename nextPrimesDirect<0,Limit,1>::type PrimesList;
@@ -309,7 +309,7 @@ struct GeneratePrimesF1direct
 };
 
 
-template<int_t Limit>
+template<uint_t Limit>
 struct GeneratePrimesF2
 {
   typedef typelist<sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>> List1;
@@ -322,7 +322,7 @@ struct GeneratePrimesF2
 };
 
 
-template<int_t Limit>
+template<uint_t Limit>
 struct GeneratePrimesF2direct
 {
   typedef typelist<sint<2>,sint<3>,sint<5>,sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>> List1;
@@ -331,7 +331,7 @@ struct GeneratePrimesF2direct
 };
 
 
-template<int_t Limit>
+template<uint_t Limit>
 struct GeneratePrimesF3
 {
   typedef typelist<sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>> List1;

@@ -33,9 +33,9 @@
 
 //This is a workaround for compilers that could not pass such a long integer as a preprocessor definition
 #if !defined(NUM) || NUM == 0 
-static const int_t N = 18446744073709551615;
+static const uint_t N = 18446744073709551615;
 #else
-static const int_t N = NUM;
+static const uint_t N = NUM;
 #endif
 //static const int_t N = 4294967291;  // max long  = 7^2×73×127×337×92737×649657
 

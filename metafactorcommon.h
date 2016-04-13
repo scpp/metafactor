@@ -10,65 +10,65 @@
 
 #include "sint.h"
 
-template<int_t N, int_t P>
+template<uint_t N, uint_t P>
 struct ipow {
-  static const int_t value = ipow<N,P-1>::value * N;
+  static const uint_t value = ipow<N,P-1>::value * N;
 };
 
-template<int_t N>
+template<uint_t N>
 struct ipow<N,1> {
-  static const int_t value = N;
+  static const uint_t value = N;
 };
 
-template<int_t N>
+template<uint_t N>
 struct ipow<N,0> {
-  static const int_t value = 1;
+  static const uint_t value = 1;
 };
 
 
 
-template<int_t N, int_t Factor, 
+template<uint_t N, uint_t Factor, 
 bool C = (N % Factor == 0)>
 struct try_factor;
   
-template<int_t N, int_t Factor>
+template<uint_t N, uint_t Factor>
 struct try_factor<N, Factor, true> {
   typedef try_factor<N/Factor, Factor> next;
-  static const int_t power = next::power + 1;
-  static const int_t factor = next::factor * Factor;
+  static const uint_t power = next::power + 1;
+  static const uint_t factor = next::factor * Factor;
 };
 
-template<int_t N, int_t Factor> 
+template<uint_t N, uint_t Factor> 
 struct try_factor<N, Factor, false> {
-  static const int_t power = 0;
-  static const int_t factor = 1;
+  static const uint_t power = 0;
+  static const uint_t factor = 1;
 };
 
-template<int_t Factor> 
+template<uint_t Factor> 
 struct try_factor<0, Factor, true> {
-  static const int_t power = 0;
-  static const int_t factor = 1;
+  static const uint_t power = 0;
+  static const uint_t factor = 1;
 };
 
 
 
-template<int_t N, int_t Candidate, bool C = (Candidate*Candidate <= N)>
+template<uint_t N, uint_t Candidate, bool C = (Candidate*Candidate <= N)>
 struct check_candidate;
 
-template<int_t N, int_t Candidate>
+template<uint_t N, uint_t Candidate>
 struct check_candidate<N, Candidate, true>
 {
   typedef try_factor<N, Candidate> trial;
-  static const int_t power  = trial::power;
-  static const int_t nextN  = N/trial::factor;
+  static const uint_t power  = trial::power;
+  static const uint_t nextN  = N/trial::factor;
   static const bool isValid = true;
 };
 
-template<int_t N, int_t Candidate>
+template<uint_t N, uint_t Candidate>
 struct check_candidate<N, Candidate, false>
 {
-  static const int_t power  = 0;
-  static const int_t nextN  = N;
+  static const uint_t power  = 0;
+  static const uint_t nextN  = N;
   static const bool isValid = false;
 };
 
