@@ -83,6 +83,7 @@ struct typelist_out<Loki::NullType>
 {
   static void print(std::ostream& os = std::cout, const char sep = '\t') 
   { 
+    (void)sep;
     os << std::endl; 
   }
 };

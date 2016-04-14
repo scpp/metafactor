@@ -17,7 +17,6 @@ typedef unsigned __int64 uint_t;
 #else
 typedef unsigned long uint_t;
 #endif
-//typedef unsigned long uint_t;
 typedef unsigned short short_t;
 
 /// Integer number metacontainer.
