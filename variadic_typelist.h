@@ -76,7 +76,7 @@ struct typelist_out<typelist<T, Args...> >
 };
 
 template<typename T1, typename T2, typename ...Args>
-struct typelist_out<typelist<spair<T1,T2>, Args...> >
+struct typelist_out<typelist<pair_<T1,T2>, Args...> >
 {
   static void print(std::ostream& os = std::cout, const char sep = '\t') 
   {

@@ -25,13 +25,13 @@ struct Product;
 template<typename H, typename Tail>
 struct Product<Loki::Typelist<H,Tail> >
 {
-  static const uint_t value = H::value * Product<Tail>::value;
+  static const ulong_t value = H::value * Product<Tail>::value;
 };
 
 template<typename H>
 struct Product<Loki::Typelist<H,Loki::NullType> >
 {
-  static const uint_t value = H::value;
+  static const ulong_t value = H::value;
 };
 
 template<>
@@ -41,19 +41,19 @@ struct Product<Loki::NullType>
 
 #if MODE == 1
 typedef TYPELIST_2(sint<3>,sint<2>) QFactorList;
-// static const uint_t StartQ = 2*3;
+// static const ulong_t StartQ = 2*3;
 #elif MODE == 2
 typedef TYPELIST_3(sint<5>,sint<3>,sint<2>) QFactorList;
-// static const uint_t StartQ = 2*3*5;
+// static const ulong_t StartQ = 2*3*5;
 #elif MODE == 3
 typedef TYPELIST_4(sint<7>,sint<5>,sint<3>,sint<2>) QFactorList;
-// static const uint_t StartQ = 2*3*5*7;
+// static const ulong_t StartQ = 2*3*5*7;
 #elif MODE == 4
 typedef TYPELIST_5(sint<11>,sint<7>,sint<5>,sint<3>,sint<2>) QFactorList;
-// static const uint_t StartQ = 2*3*5*7*11;
+// static const ulong_t StartQ = 2*3*5*7*11;
 #endif
 
-static const uint_t StartQ = Product<QFactorList>::value;
+static const ulong_t StartQ = Product<QFactorList>::value;
 
 template<typename List>
 struct typelist_out;
@@ -95,14 +95,14 @@ struct Check;
 
 template<typename H, typename Tail>
 struct Check<Loki::Typelist<H,Tail> > {
-  static uint_t get() {
+  static ulong_t get() {
     return ipow<H::first::value, H::second::value>::value * Check<Tail>::get();
   }
 };
 template<>
 struct Check<Loki::NullType> 
 {
-    static uint_t get() {
+    static ulong_t get() {
     return 1;
   }
 };
@@ -118,13 +118,13 @@ struct Print<Loki::Typelist<Head,Tail> > {
 };
 
 
-template<int I = MODE-1, uint_t Limit = StartQ, typename QFList = QFactorList>
+template<int I = MODE-1, ulong_t Limit = StartQ, typename QFList = QFactorList>
 struct InitList;
 
-template<int I, uint_t Limit, typename H, typename Tail>
+template<int I, ulong_t Limit, typename H, typename Tail>
 struct InitList<I, Limit, Loki::Typelist<H,Tail> >
 {
-  static const uint_t NextLimit = Limit/H::value;
+  static const ulong_t NextLimit = Limit/H::value;
   typedef InitList<I-1,NextLimit,Tail> Prev;
   typedef GenPrimes<Limit,NextLimit,typename Prev::Reminders> Formula;
   
@@ -132,7 +132,7 @@ struct InitList<I, Limit, Loki::Typelist<H,Tail> >
   typedef typename Loki::TL::Append<typename Prev::PrimesList, typename Formula::Result>::Result PrimesList;
 };
 
-template<uint_t Limit, typename H, typename Tail>
+template<ulong_t Limit, typename H, typename Tail>
 struct InitList<0, Limit, Loki::Typelist<H,Tail> >
 {
   typedef TYPELIST_1(sint<5>) Reminders;
@@ -160,63 +160,63 @@ typedef InitList<>::Reminders  Reminders;
 
 
 
-template<uint_t N, short Q, uint_t K, typename RList>
+template<ulong_t N, short Q, ulong_t K, typename RList>
 struct SelectFactors;
 
-template<uint_t N, short Q, uint_t K, typename H, typename Tail>
+template<ulong_t N, short Q, ulong_t K, typename H, typename Tail>
 struct SelectFactors<N,Q,K,Loki::Typelist<H,Tail> >
 {
-  static const uint_t Candidate = Q*K + H::value;
+  static const ulong_t Candidate = Q*K + H::value;
   typedef typename SelectFactors<N,Q,K,Tail>::Result Next;
   typedef typename Loki::Select<(N % Candidate == 0), Loki::Typelist<H,Next>, Next>::Result Result;
 };
 
-template<uint_t N, short Q, uint_t K>
+template<ulong_t N, short Q, ulong_t K>
 struct SelectFactors<N,Q,K,Loki::NullType>
 {
   typedef Loki::NullType Result;
 };
 
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList, bool doExit = false>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList, bool doExit = false>
 struct FactorLoop;
 
-template<uint_t N, unsigned int Q, uint_t K, typename H, typename Tail>
+template<ulong_t N, unsigned int Q, ulong_t K, typename H, typename Tail>
 struct FactorLoop<N,Q,K,Loki::Typelist<H,Tail>,false>
 {
-  static const uint_t candidate = Q*K + H::value;
+  static const ulong_t candidate = Q*K + H::value;
   typedef try_factor<N, candidate> trial;
   typedef spair<sint<candidate>, sint<trial::power> > T;
   typedef typename FactorLoop<N/trial::factor, Q, K, Tail, (candidate*candidate > N)>::Result nextIter;
   typedef typename Loki::Select<(trial::power > 0), Loki::Typelist<T,nextIter>, nextIter>::Result Result;
 };
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList>
 struct FactorLoop<N,Q,K,RList,true>
 : public FactorLoop<N,Q,K,Loki::NullType,true> {};
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct FactorLoop<N,Q,K,Loki::NullType,false>
 {
-  static const uint_t Candidate = Q*(K+1) + 1;
+  static const ulong_t Candidate = Q*(K+1) + 1;
   typedef typename SelectFactors<N,Q,K+1,Reminders>::Result RList;
   typedef typename FactorLoop<N,Q,K+1,RList,(Candidate*Candidate > N)>::Result Result;
 };
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct FactorLoop<N,Q,K,Loki::NullType,true>
 {
   typedef spair<sint<N>, sint<1> > T;
   typedef Loki::Typelist<T,Loki::NullType> Result;
 };
 
-template<unsigned int Q, uint_t K, typename RList>
+template<unsigned int Q, ulong_t K, typename RList>
 struct FactorLoop<1,Q,K,RList,true>
 {
   typedef Loki::NullType Result;
 };
 
-template<unsigned int Q, uint_t K>
+template<unsigned int Q, ulong_t K>
 struct FactorLoop<1,Q,K,Loki::NullType,true>
 {
   typedef Loki::NullType Result;
@@ -228,11 +228,11 @@ typename StartList = InitialPrimesList>
 struct Factorization;
 
 // Factorization using trial deletion from InitialPrimesList
-template<uint_t N, typename H, typename Tail>
+template<ulong_t N, typename H, typename Tail>
 struct Factorization<sint<N>, Loki::Typelist<H,Tail> >
 {
   typedef try_factor<N, H::value> trial;
-  static const uint_t P = trial::power;
+  static const ulong_t P = trial::power;
   typedef sint<N/trial::factor> NextNum;
   typedef typename Factorization<NextNum,Tail>::Result Next;
   typedef typename Loki::Select<(P > 0), 
@@ -240,11 +240,11 @@ struct Factorization<sint<N>, Loki::Typelist<H,Tail> >
 };
 
 // Further factorization 
-template<uint_t N>
+template<ulong_t N>
 struct Factorization<sint<N>, Loki::NullType> 
 {
   static const short Q = StartQ;
-  static const uint_t Candidate = Q + 1;
+  static const ulong_t Candidate = Q + 1;
   typedef typename SelectFactors<N,Q,1,Reminders>::Result RList;
   typedef typename FactorLoop<N,Q,1,RList,(Candidate*Candidate > N)>::Result Result;
 };

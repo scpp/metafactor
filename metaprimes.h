@@ -35,9 +35,9 @@ struct NextPrimesDirect<Start, Limit, K, true>
   static const bool p2 = IsPrime6<CheckSmallPrimes5>::Do<PrimeCandidate2>::value && (PrimeCandidate2 <= Limit) && (PrimeCandidate2 > Start);
   typedef typename NextPrimesDirect<Start, Limit, K+1>::Result NextIter;
   typedef typename Loki::Select<p1 && p2, 
-    Loki::Typelist<sint<PrimeCandidate1>, Loki::Typelist<sint<PrimeCandidate2>, NextIter> >, 
-    typename Loki::Select<p1, Loki::Typelist<sint<PrimeCandidate1>, NextIter>, 
-    typename Loki::Select<p2, Loki::Typelist<sint<PrimeCandidate2>, NextIter>, NextIter>::Result>::Result>::Result Result;
+    Loki::Typelist<ulong_<PrimeCandidate1>, Loki::Typelist<ulong_<PrimeCandidate2>, NextIter> >,
+    typename Loki::Select<p1, Loki::Typelist<ulong_<PrimeCandidate1>, NextIter>,
+    typename Loki::Select<p2, Loki::Typelist<ulong_<PrimeCandidate2>, NextIter>, NextIter>::Result>::Result>::Result Result;
 };
 
 template<int Start, int Limit, int K> 
@@ -68,14 +68,14 @@ template<int Limit, int K>
 struct NextPrimesDirect30<Limit, K, true>
 {
   typedef IsPrime30<CheckSmallPrimes7_29> isPrime;
-  static const uint_t C1 = 30*K + 1;
-  static const uint_t C2 = 30*K + 7;
-  static const uint_t C3 = 30*K + 11;
-  static const uint_t C4 = 30*K + 13;
-  static const uint_t C5 = 30*K + 17;
-  static const uint_t C6 = 30*K + 19;
-  static const uint_t C7 = 30*K + 23;
-  static const uint_t C8 = 30*K + 29;
+  static const ulong_t C1 = 30*K + 1;
+  static const ulong_t C2 = 30*K + 7;
+  static const ulong_t C3 = 30*K + 11;
+  static const ulong_t C4 = 30*K + 13;
+  static const ulong_t C5 = 30*K + 17;
+  static const ulong_t C6 = 30*K + 19;
+  static const ulong_t C7 = 30*K + 23;
+  static const ulong_t C8 = 30*K + 29;
   static const bool p1 = isPrime::Do<C1>::value;
   static const bool p2 = isPrime::Do<C2>::value && (C2 <= Limit);
   static const bool p3 = isPrime::Do<C3>::value && (C3 <= Limit);
@@ -86,14 +86,14 @@ struct NextPrimesDirect30<Limit, K, true>
   static const bool p8 = isPrime::Do<C8>::value && (C8 <= Limit);
   typedef typename NextPrimesDirect30<Limit, K+1>::Result NextIter;
   
-  typedef typename AddType<sint<C8>,p8,NextIter>::Result R8;
-  typedef typename AddType<sint<C7>,p7,R8>::Result R7;
-  typedef typename AddType<sint<C6>,p6,R7>::Result R6;
-  typedef typename AddType<sint<C5>,p5,R6>::Result R5;
-  typedef typename AddType<sint<C4>,p4,R5>::Result R4;
-  typedef typename AddType<sint<C3>,p3,R4>::Result R3;
-  typedef typename AddType<sint<C2>,p2,R3>::Result R2;
-  typedef typename AddType<sint<C1>,p1,R2>::Result Result;
+  typedef typename AddType<ulong_<C8>,p8,NextIter>::Result R8;
+  typedef typename AddType<ulong_<C7>,p7,R8>::Result R7;
+  typedef typename AddType<ulong_<C6>,p6,R7>::Result R6;
+  typedef typename AddType<ulong_<C5>,p5,R6>::Result R5;
+  typedef typename AddType<ulong_<C4>,p4,R5>::Result R4;
+  typedef typename AddType<ulong_<C3>,p3,R4>::Result R3;
+  typedef typename AddType<ulong_<C2>,p2,R3>::Result R2;
+  typedef typename AddType<ulong_<C1>,p1,R2>::Result Result;
 };
 
 template<int Limit, int K> 
@@ -103,29 +103,29 @@ struct NextPrimesDirect30<Limit, K, false>
 };
 
 // Returns true, if Candidate is not divisible by any entry of TrialList
-template<uint_t Candidate, typename TrialList, bool doExit = false>
+template<ulong_t Candidate, typename TrialList, bool doExit = false>
 struct isNotDivisibleByListMembers;
 
-template<uint_t Candidate, typename H, typename Tail>
+template<ulong_t Candidate, typename H, typename Tail>
 struct isNotDivisibleByListMembers<Candidate,Loki::Typelist<H,Tail>,false>
 {
   static const bool value = (Candidate % H::value != 0) && 
          isNotDivisibleByListMembers<Candidate,Tail,(H::value*H::value >= Candidate)>::value;
 };
 
-template<uint_t Candidate>
+template<ulong_t Candidate>
 struct isNotDivisibleByListMembers<Candidate,Loki::NullType,false>
 {
   static const bool value = true;
 };
 
-template<uint_t Candidate, typename H, typename Tail>
+template<ulong_t Candidate, typename H, typename Tail>
 struct isNotDivisibleByListMembers<Candidate,Loki::Typelist<H,Tail>,true>
 {
   static const bool value = true;
 };
 
-template<uint_t Candidate>
+template<ulong_t Candidate>
 struct isNotDivisibleByListMembers<Candidate,Loki::NullType,true>
 {
   static const bool value = true;
@@ -133,38 +133,38 @@ struct isNotDivisibleByListMembers<Candidate,Loki::NullType,true>
 
 // Generate all primes less equal Limit with a constant Q in the formula Q*K+R
 // Second exit criteria: (K+1 == InitRList::Head::value)
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors,
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckFactors,
          typename RemindersList = InitRList, bool doExit = false>
 struct GenPrimesFormula;
 
 // Next loop step over RList
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors, 
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckFactors,
 typename H, typename Tail>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::Typelist<H,Tail>,false>
 {
-  static const uint_t candidate = Q*K + H::value;
+  static const ulong_t candidate = Q*K + H::value;
   typedef typename GenPrimesFormula<Limit, Q, K, InitRList, CheckFactors, Tail, (candidate > Limit)>::Result nextIter;
   typedef typename Loki::Select<(candidate <= Limit && isNotDivisibleByListMembers<candidate, CheckFactors>::value), 
-          Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+          Loki::Typelist<ulong_<candidate>,nextIter>, nextIter>::Result Result;
 };
 
 // Next loop step over K
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckFactors>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,false>
 {
-  static const uint_t candidate = Q*(K+1) + 1;
+  static const ulong_t candidate = Q*(K+1) + 1;
   typedef typename GenPrimesFormula<Limit, Q, K+1, InitRList, CheckFactors, InitRList, (K+1 == InitRList::Head::value)>::Result nextIter;
   typedef typename Loki::Select<(candidate <= Limit && (K+1 < InitRList::Head::value) && isNotDivisibleByListMembers<candidate, CheckFactors>::value), 
-          Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+          Loki::Typelist<ulong_<candidate>,nextIter>, nextIter>::Result Result;
 };
 
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors, typename H, typename Tail>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckFactors, typename H, typename Tail>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::Typelist<H,Tail>,true>
 {
   typedef Loki::NullType Result;
 };
 
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckFactors>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckFactors>
 struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,true>
 {
   typedef Loki::NullType Result;
@@ -172,10 +172,10 @@ struct GenPrimesFormula<Limit,Q,K,InitRList,CheckFactors,Loki::NullType,true>
 
 
 
-template<uint_t Q, typename List, uint_t N>
+template<ulong_t Q, typename List, ulong_t N>
 struct FilterRemindersList;
 
-template<uint_t Q, typename H, typename Tail, uint_t N>
+template<ulong_t Q, typename H, typename Tail, ulong_t N>
 struct FilterRemindersList<Q, Loki::Typelist<H, Tail>, N>
 {
   static const bool C = (N*H::value < Q);
@@ -184,7 +184,7 @@ struct FilterRemindersList<Q, Loki::Typelist<H, Tail>, N>
   typedef typename Loki::Select<C, typename Next::CheckPrimes, Loki::Typelist<H, Tail> >::Result CheckPrimes;
 };
 
-template<uint_t Q, uint_t N>
+template<ulong_t Q, ulong_t N>
 struct FilterRemindersList<Q, Loki::NullType, N>
 {
   typedef Loki::NullType ExcludedPrimes;
@@ -192,17 +192,17 @@ struct FilterRemindersList<Q, Loki::NullType, N>
 };
 
 
-template<typename List, uint_t N>
+template<typename List, ulong_t N>
 struct EliminateNonPrimesLoop;
 
-template<typename H, typename Tail, uint_t N>
+template<typename H, typename Tail, ulong_t N>
 struct EliminateNonPrimesLoop<Loki::Typelist<H, Tail>, N>
 {
   typedef typename EliminateNonPrimesLoop<Tail,N>::Result Next;
   typedef typename Loki::Select<(H::value%N != 0), Loki::Typelist<H,Next>, Next>::Result Result;
 };
 
-template<uint_t N>
+template<ulong_t N>
 struct EliminateNonPrimesLoop<Loki::NullType,N>
 {
   typedef Loki::NullType Result;
@@ -229,26 +229,26 @@ struct EliminateNonPrimes<List, Loki::NullType>
 template<typename T>
 struct GetFirstNumberInList
 {
-  static const uint_t value = T::Head::value;
+  static const ulong_t value = T::Head::value;
 };
 
 template<>
 struct GetFirstNumberInList<Loki::NullType>
 {
-  static const uint_t value = 1;
+  static const ulong_t value = 1;
 };
 
-template<uint_t Limit, uint_t StartQ=6, 
-typename StartRList = TYPELIST_1(sint<5>), bool doExit = false>
+template<ulong_t Limit, ulong_t StartQ=6,
+typename StartRList = TYPELIST_1(ulong_<5>), bool doExit = false>
 struct GenPrimes;
 
-template<uint_t Limit, uint_t Q, typename RList>
+template<ulong_t Limit, ulong_t Q, typename RList>
 struct GenPrimes<Limit,Q,RList,false>
 {
-  static const uint_t NextQ = Q*RList::Head::value;
+  static const ulong_t NextQ = Q*RList::Head::value;
   typedef FilterRemindersList<NextQ,typename RList::Tail,GetFirstNumberInList<typename RList::Tail>::value> Filter;
   typedef Loki::Typelist<typename RList::Head, typename Filter::CheckPrimes> PrimesToCheck;
-  typedef Loki::Typelist<sint<Q+1>,   // Q+1 is always prime and should not be checked
+  typedef Loki::Typelist<ulong_<Q+1>,   // Q+1 is always prime and should not be checked
     typename GenPrimesFormula<(NextQ<Limit) ? NextQ : Limit,Q,1,RList,PrimesToCheck>::Result> NewList;
   typedef typename EliminateNonPrimes<NewList,typename Filter::ExcludedPrimes>::Result PrimesList;
   typedef typename Loki::TL::Append<typename RList::Tail, NewList>::Result NextRList;
@@ -256,7 +256,7 @@ struct GenPrimes<Limit,Q,RList,false>
   typedef typename Loki::TL::Append<PrimesList,NextIter>::Result Result;
 };
 
-template<uint_t Limit, uint_t Q, typename RList>
+template<ulong_t Limit, ulong_t Q, typename RList>
 struct GenPrimes<Limit,Q,RList,true>
 {
   typedef Loki::NullType Result;
@@ -266,92 +266,92 @@ struct GenPrimes<Limit,Q,RList,true>
 
 // Generate all primes less equal Limit with a constant Q in the formula Q*K+R
 // Similar to GenPrimesFormula, but without second exit condition
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, 
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList,
          typename CheckPrimeCandidate = IsPrime6<>,
          typename RList = InitRList, bool doExit = false>
 struct GeneratePrimes;
 
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename H, typename Tail, typename CheckPrimeCandidate>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename H, typename Tail, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,Loki::Typelist<H,Tail>,false>
 {
-  static const uint_t candidate = Q*K + H::value;
+  static const ulong_t candidate = Q*K + H::value;
   typedef typename GeneratePrimes<Limit, Q, K, InitRList, CheckPrimeCandidate, Tail, (candidate > Limit)>::Result nextIter;
   typedef typename Loki::Select<(candidate <= Limit && CheckPrimeCandidate::template Do<candidate>::value), 
-          Loki::Typelist<sint<candidate>,nextIter>, nextIter>::Result Result;
+          Loki::Typelist<ulong_<candidate>,nextIter>, nextIter>::Result Result;
 };
 
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckPrimeCandidate>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,Loki::NullType,false>
 : public GeneratePrimes<Limit, Q, K+1, InitRList> {};
 
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename H, typename Tail, typename CheckPrimeCandidate>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename H, typename Tail, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,Loki::Typelist<H,Tail>,true>
 { typedef Loki::NullType Result; };
 
-template<uint_t Limit, uint_t Q, uint_t K, typename InitRList, typename CheckPrimeCandidate>
+template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckPrimeCandidate>
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,Loki::NullType,true>
 { typedef Loki::NullType Result; };
 
 
-template<uint_t Limit>
+template<ulong_t Limit>
 struct GeneratePrimesF1
 {
-  typedef TYPELIST_1(sint<5>) List1;
-  typedef Loki::Typelist<sint<1>,List1> RList;
+  typedef TYPELIST_1(ulong_<5>) List1;
+  typedef Loki::Typelist<ulong_<1>,List1> RList;
   
 //   typedef typename GeneratePrimes<Limit,6,1,RList,IsPrime6<CheckSmallPrimes5> >::Result PrimesList;
   typedef typename GeneratePrimes<Limit,6,1,RList,IsPrime30<CheckSmallPrimes13_29> >::Result PrimesList;
-  typedef Loki::Typelist<sint<2>,Loki::Typelist<sint<3>,Loki::Typelist<sint<5>,PrimesList> > > Result;
+  typedef Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,Loki::Typelist<ulong_<5>,PrimesList> > > Result;
 };
 
 
-template<uint_t Limit>
+template<ulong_t Limit>
 struct GeneratePrimesF1direct
 {
   typedef typename NextPrimesDirect<0,Limit,1>::Result PrimesList;
-  typedef typename Loki::Typelist<sint<2>,Loki::Typelist<sint<3>,Loki::Typelist<sint<5>,PrimesList> > > Result;
+  typedef typename Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,Loki::Typelist<ulong_<5>,PrimesList> > > Result;
 };
 
 
-template<uint_t Limit>
+template<ulong_t Limit>
 struct GeneratePrimesF2
 {
-  typedef TYPELIST_7(sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) List1;
-  typedef Loki::Typelist<sint<1>,List1> RList;
+  typedef TYPELIST_7(ulong_<7>,ulong_<11>,ulong_<13>,ulong_<17>,ulong_<19>,ulong_<23>,ulong_<29>) List1;
+  typedef Loki::Typelist<ulong_<1>,List1> RList;
   
 //   typedef typename GeneratePrimes<Limit,30,1,RList,IsPrime6<CheckNone> >::Result PrimesList;
   typedef typename GeneratePrimes<Limit,30,1,RList,IsPrime30<CheckNone> >::Result PrimesList;
-  typedef Loki::Typelist<sint<2>,Loki::Typelist<sint<3>,Loki::Typelist<sint<5>,List1> > > List2;
+  typedef Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,Loki::Typelist<ulong_<5>,List1> > > List2;
   typedef typename Loki::TL::Append<List2, PrimesList>::Result Result;
 };
 
 
-template<uint_t Limit>
+template<ulong_t Limit>
 struct GeneratePrimesF2direct
 {
-  typedef TYPELIST_10(sint<2>,sint<3>,sint<5>,sint<7>,sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) List1;
+  typedef TYPELIST_10(ulong_<2>,ulong_<3>,ulong_<5>,ulong_<7>,ulong_<11>,ulong_<13>,ulong_<17>,ulong_<19>,ulong_<23>,ulong_<29>) List1;
   typedef typename NextPrimesDirect30<Limit>::Result PrimesList;
   typedef typename Loki::TL::Append<List1, PrimesList>::Result Result;
 };
 
 
-template<uint_t Limit>
+template<ulong_t Limit>
 struct GeneratePrimesF3
 {
-  typedef TYPELIST_6(sint<11>,sint<13>,sint<17>,sint<19>,sint<23>,sint<29>) List1;
+  typedef TYPELIST_6(ulong_<11>,ulong_<13>,ulong_<17>,ulong_<19>,ulong_<23>,ulong_<29>) List1;
   // Generate list containing primes and divisible by 11 and 13 
   // The formula 30k+r is used, but from generated numbers only divisible by 7 are eliminated
-  typedef Loki::Typelist<sint<1>,Loki::Typelist<sint<7>,List1> > RemindersListForFormula30k;
-  typedef typename GenPrimesFormula<210,30,1,RemindersListForFormula30k,TYPELIST_1(sint<7>)>::Result NewList;
-  typedef typename Loki::TL::Append<Loki::Typelist<sint<1>,List1>, NewList>::Result RemindersListForFormula210k;
-  typedef typename EliminateNonPrimes<NewList,TYPELIST_2(sint<11>,sint<13>)>::Result PList;
+  typedef Loki::Typelist<ulong_<1>,Loki::Typelist<ulong_<7>,List1> > RemindersListForFormula30k;
+  typedef typename GenPrimesFormula<210,30,1,RemindersListForFormula30k,TYPELIST_1(ulong_<7>)>::Result NewList;
+  typedef typename Loki::TL::Append<Loki::Typelist<ulong_<1>,List1>, NewList>::Result RemindersListForFormula210k;
+  typedef typename EliminateNonPrimes<NewList,TYPELIST_2(ulong_<11>,ulong_<13>)>::Result PList;
 
   // Creates a list of primes starting with 211 and not exceeding Limit
 //   typedef typename GeneratePrimes<Limit,210,1,RList,IsPrime6<CheckNone> >::Result PrimesList;
   typedef typename GeneratePrimes<Limit,210,1,RemindersListForFormula210k,IsPrime30<CheckSmallPrimes11_29> >::Result PrimesList;
   
   // Add primes less than 211
-  typedef Loki::Typelist<sint<2>,Loki::Typelist<sint<3>,Loki::Typelist<sint<5>,Loki::Typelist<sint<7>,List1> > > > List2;
+  typedef Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,Loki::Typelist<ulong_<5>,Loki::Typelist<ulong_<7>,List1> > > > List2;
   typedef typename Loki::TL::Append<List2, PList>::Result List3;
   typedef typename Loki::TL::Append<List3, PrimesList>::Result Result;
 };

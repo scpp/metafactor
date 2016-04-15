@@ -24,36 +24,36 @@ struct Product;
 template<typename H, typename ...Tail>
 struct Product<typelist<H,Tail...> >
 {
-  static const uint_t value = H::value * Product<typelist<Tail...>>::value;
+  static const ulong_t value = H::value * Product<typelist<Tail...>>::value;
 };
 
 template<typename H>
 struct Product<typelist<H> >
 {
-  static const uint_t value = H::value;
+  static const ulong_t value = H::value;
 };
 
 template<>
 struct Product<typelist<>>
 {
-//  static const uint_t value = 0;
+//  static const ulong_t value = 0;
 };
 
 #if MODE == 1
-typedef typelist<sint<3>,sint<2>> QFactorList;
-// static const uint_t StartQ = 2*3;
+typedef typelist<ulong_<3>,ulong_<2>> QFactorList;
+// static const ulong_t StartQ = 2*3;
 #elif MODE == 2
-typedef typelist<sint<5>,sint<3>,sint<2>> QFactorList;
-// static const uint_t StartQ = 2*3*5;
+typedef typelist<ulong_<5>,ulong_<3>,ulong_<2>> QFactorList;
+// static const ulong_t StartQ = 2*3*5;
 #elif MODE == 3
-typedef typelist<sint<7>,sint<5>,sint<3>,sint<2>> QFactorList;
-// static const uint_t StartQ = 2*3*5*7;
+typedef typelist<ulong_<7>,ulong_<5>,ulong_<3>,ulong_<2>> QFactorList;
+// static const ulong_t StartQ = 2*3*5*7;
 #elif MODE == 4
-typedef typelist<sint<11>,sint<7>,sint<5>,sint<3>,sint<2>> QFactorList;
-// static const uint_t StartQ = 2*3*5*7*11;
+typedef typelist<ulong_<11>,ulong_<7>,ulong_<5>,ulong_<3>,ulong_<2>> QFactorList;
+// static const ulong_t StartQ = 2*3*5*7*11;
 #endif
 
-static const uint_t StartQ = Product<QFactorList>::value;
+static const ulong_t StartQ = Product<QFactorList>::value;
 
 
 template<typename TList>
@@ -61,13 +61,13 @@ struct Check;
 
 template<typename H, typename ...Tail>
 struct Check<typelist<H,Tail...> > {
-  static uint_t get() {
+  static ulong_t get() {
     return ipow<H::first::value, H::second::value>::value * Check<typelist<Tail...>>::get();
   }
 };
 template<>
 struct Check<typelist<>> {
-  static uint_t get() {
+  static ulong_t get() {
     return 1;
   }
 };
@@ -92,13 +92,13 @@ struct select_reminders<Start, typelist<T>>
 };
 
 
-template<int I = MODE-1, uint_t Limit = StartQ, typename QFList = QFactorList>
+template<int I = MODE-1, ulong_t Limit = StartQ, typename QFList = QFactorList>
 struct InitList;
 
-template<int I, uint_t Limit, typename H, typename ...Tail>
+template<int I, ulong_t Limit, typename H, typename ...Tail>
 struct InitList<I, Limit, typelist<H,Tail...> >
 {
-  static const uint_t NextLimit = Limit/H::value;
+  static const ulong_t NextLimit = Limit/H::value;
   using Prev = InitList<I-1,NextLimit,typelist<Tail...>>;
   using Formula = GenPrimes<Limit,NextLimit,typename Prev::Reminders>;
   
@@ -106,11 +106,11 @@ struct InitList<I, Limit, typelist<H,Tail...> >
   using PrimesList = typename typelist_cat<typename Prev::PrimesList, typename Formula::type>::type;
 };
 
-template<uint_t Limit, typename H, typename ...Tail>
+template<ulong_t Limit, typename H, typename ...Tail>
 struct InitList<0, Limit, typelist<H, Tail...> >
 {
-  using Reminders = typelist<sint<5>>;
-  using PrimesList = typelist<sint<2>, sint<3>, sint<5>>;
+  using Reminders = typelist<ulong_<5>>;
+  using PrimesList = typelist<ulong_<2>, ulong_<3>, ulong_<5>>;
 };
 
 
@@ -118,29 +118,29 @@ using InitialPrimesList = InitList<>::PrimesList;
 using Reminders = InitList<>::Reminders;
 
 
-constexpr uint_t factor_power(uint_t N, uint_t Factor)
+constexpr ulong_t factor_power(ulong_t N, ulong_t Factor)
 {
   return (N % Factor == 0) ? 1+factor_power(N/Factor, Factor) : 0;
 }
 
-constexpr uint_t full_factor(uint_t N, uint_t Factor)
+constexpr ulong_t full_factor(ulong_t N, ulong_t Factor)
 {
   return (N % Factor == 0) ? Factor*full_factor(N/Factor, Factor) : 1;
 }
 
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList>
 struct select_factors;
 
-template<uint_t N, unsigned int Q, uint_t K, typename H, typename ...Tail>
+template<ulong_t N, unsigned int Q, ulong_t K, typename H, typename ...Tail>
 struct select_factors<N,Q,K,typelist<H,Tail...> >
 {
-  static const uint_t candidate = Q*K + H::value;
+  static const ulong_t candidate = Q*K + H::value;
   using next = typename select_factors<N,Q,K,typelist<Tail...>>::type;
   using type = typename std::conditional<(N % candidate == 0), typename typelist_cat<H,next>::type, next>::type;
 };
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct select_factors<N,Q,K,typelist<> >
 {
   using type = typelist<>;
@@ -148,48 +148,48 @@ struct select_factors<N,Q,K,typelist<> >
 
 
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList, bool doExit = false>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList, bool doExit = false>
 struct factor_loop;
 
-template<uint_t N, unsigned int Q, uint_t K, typename H, typename ...Tail>
+template<ulong_t N, unsigned int Q, ulong_t K, typename H, typename ...Tail>
 struct factor_loop<N,Q,K,typelist<H,Tail...>,false>
 {
-  static const uint_t candidate = Q*K + H::value;
+  static const ulong_t candidate = Q*K + H::value;
   using trial = try_factor<N, candidate>;
-  static const uint_t P = trial::power;
-  static const uint_t F = trial::factor;
-//   static const uint_t P = factor_power(N, candidate);
-//   static const uint_t F = full_factor(N, candidate);
-  using T = spair<sint<candidate>, sint<P> >;
+  static const ulong_t P = trial::power;
+  static const ulong_t F = trial::factor;
+//   static const ulong_t P = factor_power(N, candidate);
+//   static const ulong_t F = full_factor(N, candidate);
+  using T = pair_<ulong_<candidate>, ulong_<P> >;
   using nextIter = typename factor_loop<N/F, Q, K, typelist<Tail...>, (candidate*candidate > N)>::type;
   using type = typename std::conditional<(P > 0), typename typelist_cat<T,nextIter>::type, nextIter>::type;
 };
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct factor_loop<N,Q,K,typelist<>,false>
 {
-  static const uint_t candidate = Q*(K+1) + 1;
+  static const ulong_t candidate = Q*(K+1) + 1;
   using RList = typename select_factors<N,Q,K+1,Reminders>::type;
   using type = typename factor_loop<N,Q,K+1,RList,(candidate*candidate > N)>::type;
 };
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList>
 struct factor_loop<N,Q,K,RList,true>
 : public factor_loop<N,Q,K,typelist<>,true> {};
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct factor_loop<N,Q,K,typelist<>,true>
 {
-  using type = typelist<spair<sint<N>, sint<1>>>;
+  using type = typelist<pair_<ulong_<N>, ulong_<1>>>;
 };
 
-template<unsigned int Q, uint_t K, typename RList>
+template<unsigned int Q, ulong_t K, typename RList>
 struct factor_loop<1,Q,K,RList,true>
 {
   using type = typelist<>;
 };
 
-template<unsigned int Q, uint_t K>
+template<unsigned int Q, ulong_t K>
 struct factor_loop<1,Q,K,typelist<>,true>
 {
   using type = typelist<>;
@@ -198,48 +198,48 @@ struct factor_loop<1,Q,K,typelist<>,true>
 
 
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList, bool doExit = false>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList, bool doExit = false>
 struct factor_loop_r;
 
-template<uint_t N, unsigned int Q, uint_t K, typename H, typename ...Tail>
+template<ulong_t N, unsigned int Q, ulong_t K, typename H, typename ...Tail>
 struct factor_loop_r<N,Q,K,typelist<H,Tail...>,false>
 {
-  static const uint_t candidate = Q*K + H::value;
+  static const ulong_t candidate = Q*K + H::value;
   using trial = try_factor<N, candidate>;
-  static const uint_t P = trial::power;
-  static const uint_t F = trial::factor;
-//   static const uint_t P = factor_power(N, candidate);
-//   static const uint_t F = full_factor(N, candidate);
-  using T = spair<sint<candidate>, sint<P> >;
+  static const ulong_t P = trial::power;
+  static const ulong_t F = trial::factor;
+//   static const ulong_t P = factor_power(N, candidate);
+//   static const ulong_t F = full_factor(N, candidate);
+  using T = pair_<ulong_<candidate>, ulong_<P> >;
   using nextIter = typename factor_loop_r<N/F, Q, K, typelist<Tail...>, (candidate*candidate > N)>::type;
   using type = typename std::conditional<(P > 0), typename typelist_cat<T,nextIter>::type, nextIter>::type;
 };
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct factor_loop_r<N,Q,K,typelist<>,false>
 {
   using type = typelist<>;
 };
 
-template<uint_t N, unsigned int Q, uint_t K>
+template<ulong_t N, unsigned int Q, ulong_t K>
 struct factor_loop_r<N,Q,K,typelist<>,true>
 {
-  using type = typelist<spair<sint<N>, sint<1>>>;
+  using type = typelist<pair_<ulong_<N>, ulong_<1>>>;
 };
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList>
 struct factor_loop_r<N,Q,K,RList,true>
 {
-  using type = typelist<spair<sint<N>, sint<1>>>;
+  using type = typelist<pair_<ulong_<N>, ulong_<1>>>;
 };
 
-template<unsigned int Q, uint_t K, typename RList>
+template<unsigned int Q, ulong_t K, typename RList>
 struct factor_loop_r<1,Q,K,RList,true>
 {
   using type = typelist<>;
 };
 
-template<unsigned int Q, uint_t K>
+template<unsigned int Q, ulong_t K>
 struct factor_loop_r<1,Q,K,typelist<>,true>
 {
   using type = typelist<>;
@@ -247,19 +247,19 @@ struct factor_loop_r<1,Q,K,typelist<>,true>
 
 
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList, bool doExit = false>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList, bool doExit = false>
 struct factor_loop_k
 {
-  static const uint_t candidate = Q*(K+1) + 1;
+  static const ulong_t candidate = Q*(K+1) + 1;
   using ListK = typename factor_loop_r<N,Q,K,Reminders>::type;
   using Next = typename factor_loop_k<N,Q,K+1,Reminders,(candidate*candidate > N)>::type;
   using type = typename typelist_cat<ListK,Next>::type;
 };
 
-template<uint_t N, unsigned int Q, uint_t K, typename RList>
+template<ulong_t N, unsigned int Q, ulong_t K, typename RList>
 struct factor_loop_k<N,Q,K,RList,true>
 {
-  using type = typelist<spair<sint<N>, sint<1>>>;
+  using type = typelist<pair_<ulong_<N>, ulong_<1>>>;
 };
 
 
@@ -270,27 +270,27 @@ typename StartList = InitialPrimesList>
 struct factorization;
 
 // factorization using trial deletion from InitialPrimesList
-template<uint_t N, unsigned int Q, typename H, typename ...Tail>
-struct factorization<sint<N>, Q, typelist<H,Tail...> >
+template<ulong_t N, unsigned int Q, typename H, typename ...Tail>
+struct factorization<ulong_<N>, Q, typelist<H,Tail...> >
 {
-  static const uint_t candidate = H::value;
+  static const ulong_t candidate = H::value;
   using trial = try_factor<N, candidate>;
-  static const uint_t P = trial::power;
-  static const uint_t F = trial::factor;
-//   static const uint_t P = factor_power(N, candidate);
-//   static const uint_t F = full_factor(N, candidate);
-  using T = spair<sint<candidate>, sint<P> >;
-  using nextN = sint<N/F>;
+  static const ulong_t P = trial::power;
+  static const ulong_t F = trial::factor;
+//   static const ulong_t P = factor_power(N, candidate);
+//   static const ulong_t F = full_factor(N, candidate);
+  using T = pair_<ulong_<candidate>, ulong_<P> >;
+  using nextN = ulong_<N/F>;
   using next = typename factorization<nextN,Q,typelist<Tail...>>::type;
   using type = typename std::conditional<(P > 0), 
      typename typelist_cat<T, next>::type, next>::type;
 };
 
 // Further factorization 
-template<uint_t N, unsigned int Q>
-struct factorization<sint<N>, Q, typelist<> > 
+template<ulong_t N, unsigned int Q>
+struct factorization<ulong_<N>, Q, typelist<> >
 {
-  static const uint_t candidate = Q + 1;
+  static const ulong_t candidate = Q + 1;
   using RList = typename select_factors<N,Q,1,Reminders>::type;
 //   using RList = Reminders;
   using type = typename factor_loop<N,Q,1,RList,(candidate*candidate > N)>::type;
@@ -298,12 +298,12 @@ struct factorization<sint<N>, Q, typelist<> >
 
 // End of factorization
 template<unsigned int Q, typename H, typename ...List>
-struct factorization<sint<1>, Q, typelist<H, List...> > {
+struct factorization<ulong_<1>, Q, typelist<H, List...> > {
   using type = typelist<>;
 };
 
 template<unsigned int Q>
-struct factorization<sint<1>, Q, typelist<> > {
+struct factorization<ulong_<1>, Q, typelist<> > {
   using type = typelist<>;
 };
 

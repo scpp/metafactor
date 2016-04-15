@@ -33,9 +33,9 @@
 
 //This is a workaround for compilers that could not pass such a long integer as a preprocessor definition
 #if !defined(NUM) || NUM == 0 
-static const uint_t N = 18446744073709551615;
+static const ulong_t N = 18446744073709551615;
 #else
-static const uint_t N = NUM;
+static const ulong_t N = NUM;
 #endif
 //static const int_t N = 4294967291;  // max long  = 7^2×73×127×337×92737×649657
 
@@ -47,12 +47,12 @@ static const uint_t N = NUM;
 #if !defined(CPP) || CPP != 11
 
 #include "metafactor.h"
-typedef Factorization<sint<N> >::Result FList;
+typedef Factorization<ulong_<N> >::Result FList;
 
 #else  // c++11
 
 #include "metafactor11.h"
-typedef factorization<sint<N> >::type FList;
+typedef factorization<ulong_<N> >::type FList;
 
 #endif
 
@@ -65,7 +65,9 @@ int main(int argc, char *argv[])
 //     typelist_out<InitialPrimesList>::print();
 //     typelist_out<Reminders>::print();
     
+    std::cout << N << " = ";
     typelist_out<FList>::print();
+    std::cout << "Runtime check:" << std::endl;
     std::cout << N << std::endl << Check<FList>::get() << std::endl;
 
 	//std::cin.get();

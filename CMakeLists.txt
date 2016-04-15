@@ -9,8 +9,11 @@ set(CMAKE_CXX_COMPILER gcc)
 
 set(CMAKE_BUILD_TYPE Release)
 
+FILE(GLOB_RECURSE LibFiles "*.h")
+add_custom_target(headers SOURCES ${LibFiles})
+
 add_executable(metafactor metafactor.cpp)
-#add_executable(metaprimes metaprimes.cpp)
+add_executable(metaprimes metaprimes.cpp)
 
 # Set default values 
 if(NOT DEFINED ${CPP})
@@ -43,7 +46,7 @@ else(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 add_definitions(-time -O3 -Wall -std=c++11 -ftemplate-depth-1000000 -DCPP=${CPP} -DNUM=${NUM} -DMODE=${MODE})
 
 target_link_libraries(metafactor stdc++)
-#target_link_libraries(metaprimes stdc++)
+target_link_libraries(metaprimes stdc++)
 
 endif(CMAKE_CXX_COMPILER MATCHES "cl.exe")
 
