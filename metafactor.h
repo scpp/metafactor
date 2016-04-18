@@ -40,16 +40,16 @@ struct Product<Loki::NullType>
 
 
 #if MODE == 1
-typedef TYPELIST_2(sint<3>,sint<2>) QFactorList;
+typedef TYPELIST_2(ulong_<3>,ulong_<2>) QFactorList;
 // static const ulong_t StartQ = 2*3;
 #elif MODE == 2
-typedef TYPELIST_3(sint<5>,sint<3>,sint<2>) QFactorList;
+typedef TYPELIST_3(ulong_<5>,ulong_<3>,ulong_<2>) QFactorList;
 // static const ulong_t StartQ = 2*3*5;
 #elif MODE == 3
-typedef TYPELIST_4(sint<7>,sint<5>,sint<3>,sint<2>) QFactorList;
+typedef TYPELIST_4(ulong_<7>,ulong_<5>,ulong_<3>,ulong_<2>) QFactorList;
 // static const ulong_t StartQ = 2*3*5*7;
 #elif MODE == 4
-typedef TYPELIST_5(sint<11>,sint<7>,sint<5>,sint<3>,sint<2>) QFactorList;
+typedef TYPELIST_5(ulong_<11>,ulong_<7>,ulong_<5>,ulong_<3>,ulong_<2>) QFactorList;
 // static const ulong_t StartQ = 2*3*5*7*11;
 #endif
 
@@ -69,7 +69,7 @@ struct typelist_out<Loki::Typelist<H, Tail> >
 };
 
 template<typename H1, typename H2, typename Tail>
-struct typelist_out<Loki::Typelist<spair<H1,H2>, Tail> >
+struct typelist_out<Loki::Typelist<pair_<H1,H2>, Tail> >
 {
   static void print(std::ostream& os = std::cout, const char sep = '\t') 
   {
@@ -135,18 +135,18 @@ struct InitList<I, Limit, Loki::Typelist<H,Tail> >
 template<ulong_t Limit, typename H, typename Tail>
 struct InitList<0, Limit, Loki::Typelist<H,Tail> >
 {
-  typedef TYPELIST_1(sint<5>) Reminders;
-  typedef TYPELIST_3(sint<2>, sint<3>, sint<5>) PrimesList;
+  typedef TYPELIST_1(ulong_<5>) Reminders;
+  typedef TYPELIST_3(ulong_<2>, ulong_<3>, ulong_<5>) PrimesList;
 };
 
 
 typedef InitList<>::PrimesList InitialPrimesList;
 typedef InitList<>::Reminders  Reminders;
  
-// typedef TYPELIST_1(sint<5>) Reminders1;
-// typedef TYPELIST_3(sint<2>, sint<3>, sint<5>) InitialPrimesList1;
+// typedef TYPELIST_1(ulong_<5>) Reminders1;
+// typedef TYPELIST_3(ulong_<2>, ulong_<3>, ulong_<5>) InitialPrimesList1;
 // 
-// typedef TYPELIST_7(sint<7>, sint<11>, sint<13>, sint<17>, sint<19>, sint<23>, sint<29>) Reminders2;
+// typedef TYPELIST_7(ulong_<7>, ulong_<11>, ulong_<13>, ulong_<17>, ulong_<19>, ulong_<23>, ulong_<29>) Reminders2;
 // typedef typename Loki::TL::Append<InitialPrimesList1, Reminders2>::Result InitialPrimesList2;
 // 
 // typedef GenPrimes<210,30,Reminders2> Formula30k;
@@ -186,7 +186,7 @@ struct FactorLoop<N,Q,K,Loki::Typelist<H,Tail>,false>
 {
   static const ulong_t candidate = Q*K + H::value;
   typedef try_factor<N, candidate> trial;
-  typedef spair<sint<candidate>, sint<trial::power> > T;
+  typedef pair_<ulong_<candidate>, ulong_<trial::power> > T;
   typedef typename FactorLoop<N/trial::factor, Q, K, Tail, (candidate*candidate > N)>::Result nextIter;
   typedef typename Loki::Select<(trial::power > 0), Loki::Typelist<T,nextIter>, nextIter>::Result Result;
 };
@@ -206,7 +206,7 @@ struct FactorLoop<N,Q,K,Loki::NullType,false>
 template<ulong_t N, unsigned int Q, ulong_t K>
 struct FactorLoop<N,Q,K,Loki::NullType,true>
 {
-  typedef spair<sint<N>, sint<1> > T;
+  typedef pair_<ulong_<N>, ulong_<1> > T;
   typedef Loki::Typelist<T,Loki::NullType> Result;
 };
 
@@ -229,19 +229,19 @@ struct Factorization;
 
 // Factorization using trial deletion from InitialPrimesList
 template<ulong_t N, typename H, typename Tail>
-struct Factorization<sint<N>, Loki::Typelist<H,Tail> >
+struct Factorization<ulong_<N>, Loki::Typelist<H,Tail> >
 {
   typedef try_factor<N, H::value> trial;
   static const ulong_t P = trial::power;
-  typedef sint<N/trial::factor> NextNum;
+  typedef ulong_<N/trial::factor> NextNum;
   typedef typename Factorization<NextNum,Tail>::Result Next;
   typedef typename Loki::Select<(P > 0), 
-     Loki::Typelist<spair<sint<H::value>, sint<P> >, Next>, Next>::Result Result;
+     Loki::Typelist<pair_<ulong_<H::value>, ulong_<P> >, Next>, Next>::Result Result;
 };
 
 // Further factorization 
 template<ulong_t N>
-struct Factorization<sint<N>, Loki::NullType> 
+struct Factorization<ulong_<N>, Loki::NullType>
 {
   static const short Q = StartQ;
   static const ulong_t Candidate = Q + 1;
@@ -251,7 +251,7 @@ struct Factorization<sint<N>, Loki::NullType>
 
 // End of factorization
 template<typename H, typename Tail>
-struct Factorization<sint<1>, Loki::Typelist<H,Tail> > {
+struct Factorization<ulong_<1>, Loki::Typelist<H,Tail> > {
   typedef Loki::NullType Result;
 };
 

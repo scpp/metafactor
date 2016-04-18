@@ -47,6 +47,13 @@ STATIC_INTEGER_CLASS(ulong_t, ulong_)
 #undef STATIC_INTEGER_CLASS
 
 
+typedef ulong_<1> _1ul;
+typedef ulong_<2> _2ul;
+typedef ulong_<3> _3ul;
+typedef ulong_<4> _4ul;
+
+
+
 template<typename T1, typename T2>
 struct pair_ {
   typedef T1 first;
