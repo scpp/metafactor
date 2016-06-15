@@ -9,8 +9,8 @@ set(CMAKE_CXX_COMPILER gcc)
 
 set(CMAKE_BUILD_TYPE Release)
 
-FILE(GLOB_RECURSE LibFiles "*.h")
-add_custom_target(headers SOURCES ${LibFiles})
+file(GLOB_RECURSE metafactor_header_files "*.h")
+add_custom_target(metafactor_headers SOURCES ${metafactor_header_files})
 
 add_executable(metafactor metafactor.cpp)
 add_executable(metaprimes metaprimes.cpp)
