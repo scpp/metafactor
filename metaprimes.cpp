@@ -17,7 +17,7 @@
 
 // This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
 #if !defined(LIMIT) || LIMIT == 0 
-static const ulong_t N = 100;
+static const ulong_t N = 1000;
 #else
 static const ulong_t N = LIMIT;
 #endif
@@ -37,7 +37,10 @@ typedef GeneratePrimesF2direct<N>::Result PrimesList;
 
 #include "metafactor11.h"
 #include "metaprimes11.h"
-typedef GeneratePrimesF2direct<N>::type PrimesList;
+typedef GeneratePrimesF1direct<N>::type PrimesList;
+//typedef GeneratePrimesF2direct<N>::type PrimesList;
+//typedef GeneratePrimesF3<N>::type PrimesList;
+//typedef GenPrimes<N>::type PrimesList;
 
 #endif
 

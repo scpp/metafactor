@@ -31,7 +31,7 @@ struct nextPrimesDirect<Start, Limit, K, true>
   static const int Primecandidate1 = 6*K + 1;
   static const int Primecandidate2 = 6*K + 5;
   static const bool p1 = IsPrime6<CheckSmallPrimes5>::Do<Primecandidate1>::value && (Primecandidate1 > Start);
-  static const bool p2 = IsPrime6<CheckSmallPrimes5>::Do<Primecandidate1>::value && (Primecandidate2 <= Limit) && (Primecandidate2 > Start);
+  static const bool p2 = IsPrime6<CheckSmallPrimes5>::Do<Primecandidate2>::value && (Primecandidate2 <= Limit) && (Primecandidate2 > Start);
   typedef typename nextPrimesDirect<Start, Limit, K+1>::type nextIter;
   typedef typename std::conditional<p1 && p2, 
     typename typelist_cat<typelist<ulong_<Primecandidate1>, ulong_<Primecandidate2>>, nextIter>::type,
@@ -269,7 +269,7 @@ template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename H, ty
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,typelist<H,Tail...>,false>
 {
   static const ulong_t candidate = Q*K + H::value;
-  typedef typename GeneratePrimes<Limit, Q, K, InitRList, CheckPrimeCandidate, Tail..., (candidate > Limit)>::type nextIter;
+  typedef typename GeneratePrimes<Limit, Q, K, InitRList, CheckPrimeCandidate, typelist<Tail...>, (candidate > Limit)>::type nextIter;
   typedef typename std::conditional<(candidate <= Limit && CheckPrimeCandidate::template Do<candidate>::value), 
           typename typelist_cat<ulong_<candidate>,nextIter>::type, nextIter>::type type;
 };
