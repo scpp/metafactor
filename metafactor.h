@@ -126,7 +126,7 @@ struct InitList<I, Limit, Loki::Typelist<H,Tail> >
 {
   static const ulong_t NextLimit = Limit/H::value;
   typedef InitList<I-1,NextLimit,Tail> Prev;
-  typedef GenPrimes<Limit,NextLimit,typename Prev::Reminders> Formula;
+  typedef Hierarchic::GenPrimes<Limit,NextLimit,typename Prev::Reminders> Formula;
   
   typedef typename Formula::NextRList Reminders;
   typedef typename Loki::TL::Append<typename Prev::PrimesList, typename Formula::Result>::Result PrimesList;

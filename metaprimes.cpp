@@ -23,7 +23,7 @@ static const ulong_t N = LIMIT;
 #endif
 
 #ifndef MODE
-#define MODE 3
+#define MODE 1
 #endif
 
 
@@ -31,16 +31,39 @@ static const ulong_t N = LIMIT;
 
 #include "metafactor.h"
 #include "metaprimes.h"
-typedef GeneratePrimesF2direct<N>::Result PrimesList;
 
-#else  // c++11
+#if defined(__clang__)
+
+// Clang compiles primes less than 7000 quite quickly with the following, otherwise crashed
+typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
+
+#else // gcc
+
+// Top 3 compile-time generation implementations (for gcc 5.4)
+#if MODE == 1
+typedef F6K::GeneratePrimesWithList<N>::Result PrimesList;
+#elif MODE == 2
+typedef F30K::GeneratePrimesDirect<N>::Result PrimesList;
+#elif MODE == 3
+typedef F30K::GeneratePrimesWithList<N>::Result PrimesList;
+#endif
+
+#endif
+
+#else  // c++11 or higher
 
 #include "metafactor11.h"
 #include "metaprimes11.h"
-typedef GeneratePrimesF1direct<N>::type PrimesList;
-//typedef GeneratePrimesF2direct<N>::type PrimesList;
-//typedef GeneratePrimesF3<N>::type PrimesList;
-//typedef GenPrimes<N>::type PrimesList;
+
+// Top 3 compile-time generation implementations (for gcc 5.4)
+// They are generally slower than without c++11 above
+#if MODE == 1
+typedef F30K::GeneratePrimesWithList<N>::type PrimesList;
+#elif MODE == 2
+typedef F210K::GeneratePrimesWithList<N>::type PrimesList;
+#elif MODE == 3
+typedef F30K::GeneratePrimesDirect<N>::type PrimesList;
+#endif
 
 #endif
 
@@ -49,8 +72,10 @@ typedef GeneratePrimesF1direct<N>::type PrimesList;
 int main(int argc, char *argv[])
 {
 
-  typelist_out<PrimesList>::print(std::cout, '\n');
+  typelist_out<PrimesList>::print(std::cout, '\t');
 //   std::cout << Loki::TL::Length<PrimesList>::value << std::endl;
+
+  std::cout << "Check ... ";
 
   // Run-time check of the list
   if (CheckPrimesListAtRunTime<PrimesList>::apply())

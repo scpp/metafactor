@@ -57,6 +57,8 @@ struct CheckSmallPrimes2_29
   static const bool value = CheckSmallPrimes2_5<PrimeCandidate>::value && CheckSmallPrimes7_29<PrimeCandidate>::value;
 };
 
+
+////////////////////////////////////////////////////////
 template<ulong_t PrimeCandidate, int K = 1,
 bool C1 = ((6*K+1)*(6*K+1) <= PrimeCandidate),
 bool C2 = ((PrimeCandidate % (6*K+1) != 0) && (PrimeCandidate % (6*K+5) != 0))> 
@@ -176,9 +178,6 @@ struct IsPrime30
     static const bool value = InitCheck<PrimeCandidate>::value && IsPrime30loop<PrimeCandidate>::value;
   };
 };
-
-
-
 
 
 #endif /*__metaprimescommon_h*/

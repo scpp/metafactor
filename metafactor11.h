@@ -100,7 +100,7 @@ struct InitList<I, Limit, typelist<H,Tail...> >
 {
   static const ulong_t NextLimit = Limit/H::value;
   using Prev = InitList<I-1,NextLimit,typelist<Tail...>>;
-  using Formula = GenPrimes<Limit,NextLimit,typename Prev::Reminders>;
+  using Formula = Hierarchic::GenPrimes<Limit,NextLimit,typename Prev::Reminders>;
   
   using Reminders = typename Formula::NextRList;
   using PrimesList = typename typelist_cat<typename Prev::PrimesList, typename Formula::type>::type;
