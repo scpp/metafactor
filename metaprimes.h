@@ -178,41 +178,6 @@ struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,Loki::NullType,tru
 
 namespace F6K {
 
-// Initial simple and efficient primes generator using formula 6k+r, r = 1,5
-// It has shorter compile-times comparing to GenPrimes
-template<int Start, int Limit, int K,
-int C = (6*K + 1 <= Limit)>
-struct NextPrimesDirect;
-
-template<int Start, int Limit, int K>
-struct NextPrimesDirect<Start, Limit, K, true>
-{
-  static const int PrimeCandidate1 = 6*K + 1;
-  static const int PrimeCandidate2 = 6*K + 5;
-  static const bool p1 = IsPrime6<CheckSmallPrimes5>::Do<PrimeCandidate1>::value && (PrimeCandidate1 > Start);
-  static const bool p2 = IsPrime6<CheckSmallPrimes5>::Do<PrimeCandidate2>::value && (PrimeCandidate2 <= Limit) && (PrimeCandidate2 > Start);
-  typedef typename NextPrimesDirect<Start, Limit, K+1>::Result NextIter;
-  typedef typename Loki::Select<p1 && p2,
-    Loki::Typelist<ulong_<PrimeCandidate1>, Loki::Typelist<ulong_<PrimeCandidate2>, NextIter> >,
-    typename Loki::Select<p1, Loki::Typelist<ulong_<PrimeCandidate1>, NextIter>,
-    typename Loki::Select<p2, Loki::Typelist<ulong_<PrimeCandidate2>, NextIter>, NextIter>::Result>::Result>::Result Result;
-};
-
-template<int Start, int Limit, int K>
-struct NextPrimesDirect<Start, Limit, K, false>
-{
-  typedef Loki::NullType Result;
-};
-
-
-/////////////////////////////////////////////
-template<ulong_t Limit>
-struct GeneratePrimesDirect
-{
-  typedef typename NextPrimesDirect<0,Limit,1>::Result PrimesList;
-  typedef typename Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,Loki::Typelist<ulong_<5>,PrimesList> > > Result;
-};
-
 
 /////////////////////////////////////////////
 template<ulong_t Limit>
@@ -230,59 +195,6 @@ struct GeneratePrimesWithList
 
 
 namespace F30K {
-
-// Experimental code to achieve shorter compile-times comparing to GenPrimes
-template<int Limit, int K = 1, int C = (30*K + 1 <= Limit)>
-struct NextPrimesDirect;
-
-template<int Limit, int K>
-struct NextPrimesDirect<Limit, K, true>
-{
-  typedef IsPrime30<CheckSmallPrimes7_29> isPrime;
-  static const ulong_t C1 = 30*K + 1;
-  static const ulong_t C2 = 30*K + 7;
-  static const ulong_t C3 = 30*K + 11;
-  static const ulong_t C4 = 30*K + 13;
-  static const ulong_t C5 = 30*K + 17;
-  static const ulong_t C6 = 30*K + 19;
-  static const ulong_t C7 = 30*K + 23;
-  static const ulong_t C8 = 30*K + 29;
-  static const bool p1 = isPrime::Do<C1>::value;
-  static const bool p2 = isPrime::Do<C2>::value && (C2 <= Limit);
-  static const bool p3 = isPrime::Do<C3>::value && (C3 <= Limit);
-  static const bool p4 = isPrime::Do<C4>::value && (C4 <= Limit);
-  static const bool p5 = isPrime::Do<C5>::value && (C5 <= Limit);
-  static const bool p6 = isPrime::Do<C6>::value && (C6 <= Limit);
-  static const bool p7 = isPrime::Do<C7>::value && (C7 <= Limit);
-  static const bool p8 = isPrime::Do<C8>::value && (C8 <= Limit);
-  typedef typename NextPrimesDirect<Limit, K+1>::Result NextIter;
-
-  typedef typename AddType<ulong_<C8>,p8,NextIter>::Result R8;
-  typedef typename AddType<ulong_<C7>,p7,R8>::Result R7;
-  typedef typename AddType<ulong_<C6>,p6,R7>::Result R6;
-  typedef typename AddType<ulong_<C5>,p5,R6>::Result R5;
-  typedef typename AddType<ulong_<C4>,p4,R5>::Result R4;
-  typedef typename AddType<ulong_<C3>,p3,R4>::Result R3;
-  typedef typename AddType<ulong_<C2>,p2,R3>::Result R2;
-  typedef typename AddType<ulong_<C1>,p1,R2>::Result Result;
-};
-
-template<int Limit, int K>
-struct NextPrimesDirect<Limit, K, false>
-{
-  typedef Loki::NullType Result;
-};
-
-
-/////////////////////////////////////////////
-template<ulong_t Limit>
-struct GeneratePrimesDirect
-{
-  typedef TYPELIST_10(ulong_<2>,ulong_<3>,ulong_<5>,ulong_<7>,ulong_<11>,ulong_<13>,ulong_<17>,ulong_<19>,ulong_<23>,ulong_<29>) List1;
-  typedef typename NextPrimesDirect<Limit>::Result PrimesList;
-  typedef typename Loki::TL::Append<List1, PrimesList>::Result Result;
-};
-
 
 /////////////////////////////////////////////
 template<ulong_t Limit>

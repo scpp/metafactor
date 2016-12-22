@@ -41,11 +41,11 @@ typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
 
 // Top 3 compile-time generation implementations (for gcc 5.4)
 #if MODE == 1
-typedef F6K::GeneratePrimesWithList<N>::Result PrimesList;
+typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
 #elif MODE == 2
-typedef F30K::GeneratePrimesDirect<N>::Result PrimesList;
-#elif MODE == 3
 typedef F30K::GeneratePrimesWithList<N>::Result PrimesList;
+#elif MODE == 3
+typedef F6K::GeneratePrimesWithList<N>::Result PrimesList;
 #endif
 
 #endif
@@ -58,11 +58,11 @@ typedef F30K::GeneratePrimesWithList<N>::Result PrimesList;
 // Top 3 compile-time generation implementations (for gcc 5.4)
 // They are generally slower than without c++11 above
 #if MODE == 1
-typedef F30K::GeneratePrimesWithList<N>::type PrimesList;
-#elif MODE == 2
 typedef F210K::GeneratePrimesWithList<N>::type PrimesList;
+#elif MODE == 2
+typedef F30K::GeneratePrimesWithList<N>::type PrimesList;
 #elif MODE == 3
-typedef F30K::GeneratePrimesDirect<N>::type PrimesList;
+typedef F6K::GeneratePrimesWithList<N>::type PrimesList;
 #endif
 
 #endif
