@@ -17,137 +17,7 @@
 #include "metafactorcommon.h"
 #include "metaprimescommon.h"
 
-#include "variadic_typelist.h"
-
-// try to use c++11 constexpr functions
-namespace cexpr {
-
-struct CheckNone
-{
-    static constexpr const bool value(const ulong_t) { return true; }
-};
-
-struct CheckSmallPrimes5
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (PrimeCandidate%5 != 0);
-    }
-};
-
-struct CheckSmallPrimes2_5
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (PrimeCandidate%2 != 0) && (PrimeCandidate%3 != 0) && (PrimeCandidate%5 != 0);
-    }
-};
-
-struct CheckSmallPrimes13_29
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (PrimeCandidate%13 != 0) && (PrimeCandidate%17 != 0)
-            && (PrimeCandidate%19 != 0) && (PrimeCandidate%23 != 0) && (PrimeCandidate%29 != 0);
-    }
-};
-
-struct CheckSmallPrimes11_29
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (PrimeCandidate%11 != 0) && (PrimeCandidate%13 != 0) && (PrimeCandidate%17 != 0)
-            && (PrimeCandidate%19 != 0) && (PrimeCandidate%23 != 0) && (PrimeCandidate%29 != 0);
-    }
-};
-
-struct CheckSmallPrimes7_29
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (PrimeCandidate%7 != 0) && cexpr::CheckSmallPrimes11_29::value(PrimeCandidate);
-    }
-};
-
-struct CheckSmallPrimes5_29
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return cexpr::CheckSmallPrimes5::value(PrimeCandidate) && cexpr::CheckSmallPrimes7_29::value(PrimeCandidate);
-    }
-};
-
-struct CheckSmallPrimes2_29
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return cexpr::CheckSmallPrimes2_5::value(PrimeCandidate) && cexpr::CheckSmallPrimes7_29::value(PrimeCandidate);
-    }
-};
-
-////////////////////////////////////////////////////////
-struct IsPrime6loop
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate, const int K=1)
-    {
-        const bool C1 = ((6*K+1)*(6*K+1) <= PrimeCandidate);
-        const bool C2 = ((PrimeCandidate % (6*K+1) != 0) && (PrimeCandidate % (6*K+5) != 0));
-        return (!C1 && !C2) ? ((K == 1) ? true : false) : ((C1 && C2) ? IsPrime6loop::value(PrimeCandidate, K+1) : (C1 ? false : true /* C2 */));
-    }
-};
-
-
-template<class InitCheck = CheckSmallPrimes2_5>
-struct IsPrime6
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (InitCheck::value(PrimeCandidate) && cexpr::IsPrime6loop::value(PrimeCandidate));
-    }
-};
-
-
-////////////////////////////////////////////////////////
-struct IsPrime30loop
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate, const int K=1)
-    {
-        const bool C1 = ((30*K+1)*(30*K+1) <= PrimeCandidate);
-        const bool C2 = (PrimeCandidate % (30*K+1) != 0) && (PrimeCandidate % (30*K+7) != 0)
-                    && (PrimeCandidate % (30*K+11) != 0) && (PrimeCandidate % (30*K+13) != 0)
-                    && (PrimeCandidate % (30*K+17) != 0) && (PrimeCandidate % (30*K+19) != 0)
-                    && (PrimeCandidate % (30*K+23) != 0) && (PrimeCandidate % (30*K+29) != 0);
-        return (!C1 && !C2) ? ((K == 1) ? (PrimeCandidate%7 != 0) : false) : ((C1 && C2) ? IsPrime30loop::value(PrimeCandidate, K+1) : (C1 ? false : true /* C2 */));
-    }
-};
-
-
-template<class InitCheck = CheckSmallPrimes2_29>
-struct IsPrime30
-{
-    static constexpr const bool value(const ulong_t PrimeCandidate)
-    {
-        return (InitCheck::value(PrimeCandidate) && cexpr::IsPrime30loop::value(PrimeCandidate));
-    }
-};
-
-
-}  // cexpr
-
-
-/////////////////////////////////////////////
-template<typename C, bool b, typename Next>
-struct addType
-{
-  typedef Next type;
-};
-
-template<typename C, typename Next>
-struct addType<C,true,Next>
-{
-  typedef typename typelist_cat<C,Next>::type type;
-};
-
+#include "cexpr.h"
 
 
 
@@ -262,8 +132,9 @@ typedef typelist<ulong_<2>,ulong_<3>,ulong_<5>> typelist235;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+/// Iterates over all reminders in RList for given Q and K
 template<ulong_t Limit, ulong_t Q, ulong_t K, typename RList,
-         typename CheckPrimeCandidate = cexpr::IsPrime6<>, bool doExit = false>
+         typename CheckPrimeCandidate, bool doExit = false>
 struct GeneratePrimesRLoop;
 
 template<ulong_t Limit, ulong_t Q, ulong_t K, typename H, typename ...Tail, typename CheckPrimeCandidate>
@@ -288,26 +159,33 @@ struct GeneratePrimesRLoop<Limit,Q,K,typelist<>,CheckPrimeCandidate,true>
 { typedef typelist<> type; };
 
 
-
+// Generate all primes less equal Limit with a constant Q in the formula Q*K+R
+// Similar to GenPrimesFormula, but without second exit condition,
+// that means the same formula is used up to the Limit
 template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList,
          typename CheckPrimeCandidate, bool doExit = false>
-struct GeneratePrimes1;
+struct GeneratePrimes;
 
 template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckPrimeCandidate>
-struct GeneratePrimes1<Limit,Q,K,InitRList,CheckPrimeCandidate,false>
+struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,false>
 {
   typedef typename GeneratePrimesRLoop<Limit, Q, K, InitRList, CheckPrimeCandidate>::type List;
-  typedef typename GeneratePrimes1<Limit, Q, K+1, InitRList, CheckPrimeCandidate, (Q*(K+1) >= Limit)>::type nextIter;
+  typedef typename GeneratePrimes<Limit, Q, K+1, InitRList, CheckPrimeCandidate, (Q*(K+1) >= Limit)>::type nextIter;
   typedef typename typelist_cat<List,nextIter>::type type;
 };
 
 template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename CheckPrimeCandidate>
-struct GeneratePrimes1<Limit,Q,K,InitRList,CheckPrimeCandidate,true>
+struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,true>
 { typedef typelist<> type; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+/// Class templates under this namespace generate single deep recursion.
+/// Increasing K or taking the next reminder will go into the next recursion level.
+/// The algorithms here are not used anymore and remain as an example, because
+/// compilers still have difficulties with very deep template recursions taking much CPU-time and RAM
+namespace SingleRecursion {
 
 // Generate all primes less equal Limit with a constant Q in the formula Q*K+R
 // Similar to GenPrimesFormula, but without second exit condition,
@@ -337,7 +215,7 @@ template<ulong_t Limit, ulong_t Q, ulong_t K, typename InitRList, typename Check
 struct GeneratePrimes<Limit,Q,K,InitRList,CheckPrimeCandidate,typelist<>,true>
 { typedef typelist<> type; };
 
-
+} // SingleRecursion
 
 
 namespace F6K {
@@ -401,7 +279,7 @@ struct GeneratePrimesWithList
 #else  // c++11
     typedef typename GeneratePrimes<Limit,210,1,RemindersListForFormula210k,IsPrime30<CheckSmallPrimes11_29> >::type PrimesList;
 #endif
-    //   typedef typename GeneratePrimes<Limit,210,1,RList,IsPrime6<CheckNone> >::type PrimesList;
+    //   typedef typename GeneratePrimes<Limit,210,1,RemindersListForFormula210k,IsPrime6<CheckNone> >::type PrimesList;
 
   // Add primes less than 211
   typedef typename typelist_cat<typelist<ulong_<2>,ulong_<3>,ulong_<5>,ulong_<7>>,List1>::type List2;

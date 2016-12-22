@@ -52,6 +52,12 @@ struct CheckSmallPrimes7_29
 };
 
 template<ulong_t PrimeCandidate>
+struct CheckSmallPrimes5_29
+{
+  static const bool value = CheckSmallPrimes5<PrimeCandidate>::value && CheckSmallPrimes7_29<PrimeCandidate>::value;
+};
+
+template<ulong_t PrimeCandidate>
 struct CheckSmallPrimes2_29
 {
   static const bool value = CheckSmallPrimes2_5<PrimeCandidate>::value && CheckSmallPrimes7_29<PrimeCandidate>::value;
