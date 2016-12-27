@@ -20,7 +20,6 @@
 #include "Typelist.h"
 
 
-
 // Returns true, if Candidate is not divisible by any entry of TrialList
 template<ulong_t Candidate, typename TrialList, bool doExit = false>
 struct isNotDivisibleByListMembers;
@@ -99,7 +98,7 @@ template<typename H, typename Tail, ulong_t N>
 struct EliminateNonPrimesLoop<Loki::Typelist<H, Tail>, N>
 {
   typedef typename EliminateNonPrimesLoop<Tail,N>::Result Next;
-  typedef typename Loki::Select<(H::value%N != 0), Loki::Typelist<H,Next>, Next>::Result Result;
+  typedef typename Loki::Select<(H::value%N != 0 || H::value == N), Loki::Typelist<H,Next>, Next>::Result Result;
 };
 
 template<ulong_t N>
@@ -124,6 +123,27 @@ template<typename List>
 struct EliminateNonPrimes<List, Loki::NullType>
 {
   typedef List Result;
+};
+
+
+
+//////////////////////////////////////////////////////////
+template<ulong_t Limit, typename List, ulong_t Counter=0, bool doExit = false>
+struct EliminateNonPrimesWithFactor;
+
+template<ulong_t Limit, typename List, ulong_t Counter>
+struct EliminateNonPrimesWithFactor<Limit, List, Counter, false>
+{
+  typedef typename Loki::TL::TypeAt<List, Counter>::Result Factor;
+  static const ulong_t N = Factor::value;
+  typedef typename EliminateNonPrimesLoop<List, N>::Result NewList;
+  typedef typename EliminateNonPrimesWithFactor<Limit,NewList,Counter+1,(N*N > Limit)>::Result Result;
+};
+
+template<ulong_t Limit, typename List, ulong_t Counter>
+struct EliminateNonPrimesWithFactor<Limit, List, Counter, true>
+{
+    typedef List Result;
 };
 
 
@@ -232,6 +252,40 @@ struct GeneratePrimesWithList
   typedef typename GeneratePrimes<Limit,6,1,RList,IsPrime30<CheckSmallPrimes5_29> >::Result PrimesList;
   typedef Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,Loki::Typelist<ulong_<5>,PrimesList> > > Result;
 };
+
+
+template<ulong_t Limit, ulong_t K = 1, bool doExit = false>
+struct GenerateInitCandidateList;
+
+template<ulong_t Limit, ulong_t K>
+struct GenerateInitCandidateList<Limit, K, false>
+{
+    static const ulong_t candidate1 = 6*K+1;
+    static const ulong_t candidate2 = 6*K+5;
+    static const bool C = (candidate1 <= Limit && candidate2 <= Limit);
+    typedef typename GenerateInitCandidateList<Limit, K+1, !C>::Result nextIter;
+    typedef typename Loki::Select<C, Loki::Typelist<ulong_<candidate1>,Loki::Typelist<ulong_<candidate2>,nextIter> >,
+            typename Loki::Select<(candidate1 <= Limit), Loki::Typelist<ulong_<candidate1>,nextIter>, nextIter>::Result>::Result Result;
+};
+
+template<ulong_t Limit, ulong_t K>
+struct GenerateInitCandidateList<Limit, K, true>
+{
+    typedef Loki::NullType Result;
+};
+
+
+template<ulong_t Limit>
+struct Sieve
+{
+    typedef typename GenerateInitCandidateList<Limit>::Result InitList;
+    // EliminateNonPrimesWithFactor takes the first element as the first trial factor
+    typedef Loki::Typelist<ulong_<5>,InitList> List;
+    typedef typename EliminateNonPrimesWithFactor<Limit, List>::Result NewList;
+    // complete list with 2 and 3
+    typedef Loki::Typelist<ulong_<2>,Loki::Typelist<ulong_<3>,NewList>> Result;
+};
+
 
 }  // F6K
 

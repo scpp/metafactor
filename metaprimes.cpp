@@ -15,8 +15,8 @@
 
 #include "sint.h"
 
-// This is a workaround for compilers that could not pass such a big integer as a preprocessor definition
-#if !defined(LIMIT) || LIMIT == 0 
+
+#if !defined(LIMIT) || (LIMIT == 0)
 static const ulong_t N = 1000;
 #else
 static const ulong_t N = LIMIT;
@@ -32,13 +32,6 @@ static const ulong_t N = LIMIT;
 #include "metafactor.h"
 #include "metaprimes.h"
 
-#if defined(__clang__)
-
-// Clang compiles primes less than 7000 quite quickly with the following, otherwise crashed
-typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
-
-#else // gcc
-
 // Top 3 compile-time generation implementations (for gcc 5.4)
 #if MODE == 1
 typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
@@ -46,8 +39,7 @@ typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
 typedef F30K::GeneratePrimesWithList<N>::Result PrimesList;
 #elif MODE == 3
 typedef F6K::GeneratePrimesWithList<N>::Result PrimesList;
-#endif
-
+//typedef F6K::Sieve<N>::Result PrimesList;
 #endif
 
 #else  // c++11 or higher
