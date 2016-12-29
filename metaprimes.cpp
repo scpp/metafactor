@@ -37,6 +37,7 @@ static const ulong_t N = LIMIT;
 typedef F210K::GeneratePrimesWithList<N>::Result PrimesList;
 #elif MODE == 2
 typedef F30K::GeneratePrimesWithList<N>::Result PrimesList;
+//typedef F30K::Sieve<N>::Result PrimesList;
 #elif MODE == 3
 typedef F6K::GeneratePrimesWithList<N>::Result PrimesList;
 //typedef F6K::Sieve<N>::Result PrimesList;

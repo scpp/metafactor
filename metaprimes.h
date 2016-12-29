@@ -305,6 +305,67 @@ struct GeneratePrimesWithList
   typedef typename Loki::TL::Append<List2, PrimesList>::Result Result;
 };
 
+
+template<ulong_t Limit, ulong_t K, typename List, bool doExit = false>
+struct GenerateInitCandidateListLoop;
+
+
+template<ulong_t Limit, ulong_t K>
+struct GenerateInitCandidateList
+{
+    typedef TYPELIST_8(ulong_<1>, ulong_<7>, ulong_<11>, ulong_<13>, ulong_<17>, ulong_<19>, ulong_<23>, ulong_<29>) Reminders;
+    typedef typename GenerateInitCandidateListLoop<Limit, K, Reminders>::Result Result;
+};
+
+
+template<ulong_t Limit, ulong_t K, typename H, typename Tail>
+struct GenerateInitCandidateListLoop<Limit, K, Loki::Typelist<H,Tail>, false>
+{
+    static const ulong_t N = 30*K + H::value;
+    static const bool C = (N <= Limit);
+    typedef typename GenerateInitCandidateListLoop<Limit, K, Tail, !C>::Result nextIter;
+    typedef typename Loki::Select<C, Loki::Typelist<ulong_<N>, nextIter>, nextIter>::Result Result;
+};
+
+template<ulong_t Limit, ulong_t K, typename H, typename Tail>
+struct GenerateInitCandidateListLoop<Limit, K, Loki::Typelist<H,Tail>, true>
+{
+    typedef Loki::NullType Result;
+};
+
+template<ulong_t Limit, ulong_t K>
+struct GenerateInitCandidateListLoop<Limit, K, Loki::NullType, false>
+{
+    typedef typename GenerateInitCandidateList<Limit, K+1>::Result Result;
+};
+
+template<ulong_t Limit, ulong_t K>
+struct GenerateInitCandidateListLoop<Limit, K, Loki::NullType, true>
+{
+    typedef Loki::NullType Result;
+};
+
+
+
+
+template<ulong_t Limit>
+struct Sieve
+{
+    typedef typename GenerateInitCandidateList<Limit, 1>::Result InitList;
+    // EliminateNonPrimesWithFactor takes the first element as the first trial factor
+    typedef Loki::Typelist<ulong_<7>,
+            Loki::Typelist<ulong_<11>,
+            Loki::Typelist<ulong_<13>,
+            Loki::Typelist<ulong_<17>,
+            Loki::Typelist<ulong_<19>,
+            Loki::Typelist<ulong_<23>,
+            Loki::Typelist<ulong_<29>, InitList> > > > > > > List;
+    typedef typename EliminateNonPrimesWithFactor<Limit, List>::Result NewList;
+//    // complete list with 2, 3, 5
+    typedef Loki::Typelist<ulong_<2>, Loki::Typelist<ulong_<3>, Loki::Typelist<ulong_<5>, NewList> > > Result;
+};
+
+
 }  // F30K
 
 
