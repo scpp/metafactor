@@ -43,4 +43,5 @@ do
   done
 done
 
+cd ..
 mv CMakeLists.txt.bak CMakeLists.txt
